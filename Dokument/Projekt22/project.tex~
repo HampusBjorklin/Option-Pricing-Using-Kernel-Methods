@@ -1,0 +1,53 @@
+\documentclass{article}
+\usepackage{url}
+\usepackage{graphicx}
+
+\title{Goal-oriented adaptive FEM for option pricing with duality-based a posteriori estimates}
+
+\author{Contact person: Elisabeth Larsson \url{elisabeth.larsson@it.uu.se}}
+
+\begin{document}
+\maketitle
+An option pricing problem can be described either in terms of one or more stochastic diffusion processes for the underlying assets, and potentially additional processes for the volatility of the assets and or the interest rate, or as a PDE or PIDE (partial integro-differential equation) for the option price. The corresponding numerical methods are in the first case Monte Carlo methods and in the second any numerical PDE solver. What determines the optimal choice is mainly the number of underlying assets or processes, which in the PDE case corresponds to the number of dimensions. Monte Carlo methods are the most efficient for high-dimensional problems, while standard PDE methods are competitive for lower dimensions up to around five dimensions. There are also specialized deterministic methods such as sparse grid approximation~\cite{hilber2010wavelet,lopez2018pde} that can be of interest up to ten dimensions or more.
+
+The most common choice of deterministic method is the finite difference method (FDM). The main reason is that the computational domain in the asset-space often is taken as a square or rectangle, which makes it easy to create a grid. The most competitive FDM also include adaptivity~\cite{vonSydow13,Salmi14a}, but then the grid structure is a limitation, since the adaptive refinement affects a whole dimension rather than a localized region. An alternative is to use stencil approximations on scattered nodes, see~\cite{milovanovic2020high}. However, this is a relatively new research area so far.
+
+Another relevant choice of method for local adaptivity is the finite element method. There are articles that explore this direction, but it has not gained dominance. Some examples are~\cite{zvan1998general}, where a blockwise refined regular mesh is used, \cite{achdou2007finite}, where an open source FEM solver with mesh adaptivity is used, and \cite{ern2004adaptive}, which uses a more advanced form of adaptivity including duality-based a posteriori estimates. Similar estimates were also used in a finite difference context in~\cite{lotstedt2007space}
+
+\section*{Project plan}
+The first part of the project consists of implementing a goal-oriented adaptive FEM for a benchmark European spread call option problem in two asset dimensions from~\cite{von2015benchop}. The problem is given by
+
+\begin{equation}
+\frac{\partial u}{\partial t}  +
+\frac{1}{2} \sigma_1^2 s_1^2 \frac{\partial^2 u}{\partial s_1^2}
++ \rho \sigma_1 \sigma_2 s_1s_2 \frac{\partial^2 u}{\partial s_1 \partial s_2}
++ \frac{1}{2} \sigma_2^2 s_2^2 \frac{\partial ^2u}{\partial s_2^2}
++ r s_1 \frac{\partial u}{\partial s_1}
++ r s_2 \frac{\partial u}{\partial s_2} 
+ - r  u=0.
+\end{equation}
+The model parameters to use are $r = 0.03$, $\sigma_1 = \sigma_2=0.15$, $\rho = 0.5$, $K=0$, and $T=1$. The payoff function for the European call spread option is $\phi(s_1,s_2)=\max(s_1-s_2-K,0)$.
+
+Which boundary conditions to use in the FEM setting can be discussed and/or investigated. 
+
+Reference solution values to validate the implementation against can be found at the BENCHOP web page \url{http://www.it.uu.se/research/scientific_computing/project/compfin/benchop/original}. There are also other implementations of solvers in MATLAB that can be used for a comparison of efficiency.
+
+The payoff function is illustrated in Figure~\ref{fig:1}. As the discontinuity in the first derivative goes diagonally across the rectangle with corners $(1,0)$ and $(4,3)$, a finite difference method needs to refine almost the whole domain to adaptively resolve the problem.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{payoff.pdf}
+  \caption{The payoff for the  European call spread option.}
+  \label{fig:1}
+\end{figure}  
+
+Assuming that there is time to go further, other types of options with challengeing payoff structures can be considered as well as non-linear modifications of the option pricing problem. Examples of relevant non-linearities are American boundary conditions and transaction costs.
+
+\bibliographystyle{siam}
+\bibliography{refs}
+
+\end{document}
+zvan1998general: local adaptivity, but not goal-oriented or unstructured.
+achdou2007finite: some standard mesh adaptivity
+ern2004adaptive: dual problem for goal-oriented adaptivity
+hilber2010wavelet: sparse grid

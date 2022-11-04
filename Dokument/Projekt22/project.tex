@@ -1,0 +1,44 @@
+\documentclass{article}
+\usepackage{url}
+\usepackage{graphicx}
+
+\title{High-dimensional option pricing using kernel methods}
+
+\author{Contact person: Elisabeth Larsson \url{elisabeth.larsson@it.uu.se}}
+
+\begin{document}
+\maketitle
+An option pricing problem can be described either in terms of one or more stochastic diffusion processes for the underlying assets, and potentially additional processes for the volatility of the assets and or the interest rate, or as a PDE or PIDE (partial integro-differential equation) for the option price. The corresponding numerical methods are in the first case Monte Carlo methods and in the second any numerical PDE solver. What determines the optimal choice is mainly the number of underlying assets or processes, which in the PDE case corresponds to the number of dimensions. Monte Carlo methods are the most efficient for high-dimensional problems, while standard PDE methods are competitive for lower dimensions up to around five dimensions. There are also specialized deterministic methods such as sparse grid approximation~\cite{hilber2010wavelet,lopez2018pde} that can be of interest up to ten dimensions or more.
+
+The most common choice of deterministic method is the finite difference method (FDM). The main reason is that the computational domain in the asset-space often is taken as a square or rectangle, which makes it easy to create a grid. The most competitive FDM also include adaptivity~\cite{vonSydow13,Salmi14a}, but then the grid structure is a limitation, since the adaptive refinement affects a whole dimension rather than a localized region. An alternative is to use stencil approximations on scattered nodes, see~\cite{milovanovic2020high}. 
+
+In this project, the idea is to investigate whether a combination of a decomposition into lower-dimensional parts and meshfree kernel-based approximation can be used to solve these high-dimensional problems. We will use a preprint by Holger Wendland and Christian Rieger as basis for this.
+
+\section*{Project plan}
+The first part of the project consists of investigating the dimensional structure of the option price for an example in the literature. The full solution will not be available, but the convergence/changes as more factors are added could be investigated. Potentially, some further results can be generated using a Monte Carlo method.
+
+The next part would focus on how to use the dimensional structure when solving the Black-Scholes PDE for a basket option. Some questions to investigate would be how to sample the lower dimensional problems and how to perform explicit and/or implictit time-stepping using theses approximations. The Black-Scholes PDe in two dimensions is illustrated below.
+
+\begin{equation}
+\frac{\partial u}{\partial t}  +
+\frac{1}{2} \sigma_1^2 s_1^2 \frac{\partial^2 u}{\partial s_1^2}
++ \rho \sigma_1 \sigma_2 s_1s_2 \frac{\partial^2 u}{\partial s_1 \partial s_2}
++ \frac{1}{2} \sigma_2^2 s_2^2 \frac{\partial ^2u}{\partial s_2^2}
++ r s_1 \frac{\partial u}{\partial s_1}
++ r s_2 \frac{\partial u}{\partial s_2} 
+ - r  u=0.
+\end{equation}
+The model parameters to use are $r = 0.03$, $\sigma_1 = \sigma_2=0.15$, $\rho = 0.5$, $K=0$, and $T=1$. The payoff function for the European call spread option is $\phi(s_1,s_2)=\max(s_1-s_2-K,0)$.
+
+\cite{von2015benchop}
+
+
+Some reference solution values to validate the implementation against will be provided from the BENCHOP project \url{http://www.it.uu.se/research/scientific_computing/project/compfin/benchop/original}. 
+\bibliographystyle{siam}
+\bibliography{refs}
+
+\end{document}
+zvan1998general: local adaptivity, but not goal-oriented or unstructured.
+achdou2007finite: some standard mesh adaptivity
+ern2004adaptive: dual problem for goal-oriented adaptivity
+hilber2010wavelet: sparse grid

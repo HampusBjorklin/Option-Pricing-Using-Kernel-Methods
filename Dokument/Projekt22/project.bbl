@@ -1,0 +1,38 @@
+\begin{thebibliography}{1}
+
+\bibitem{hilber2010wavelet}
+{\sc N.~Hilber, S.~Kehtari, C.~Schwab, and C.~Winter}, {\em Wavelet finite
+  element method for option pricing in highdimensional diffusion market
+  models}, SAM Report, 2011 (2010).
+
+\bibitem{lopez2018pde}
+{\sc J.~G. L{\'o}pez-Salas and C.~V{\'a}zquez}, {\em Pde formulation of some
+  sabr/libor market models and its numerical solution with a sparse grid
+  combination technique}, Computers \& Mathematics with Applications, 75
+  (2018), pp.~1616--1634.
+
+\bibitem{milovanovic2020high}
+{\sc S.~Milovanovi{\'c} and L.~von Sydow}, {\em A high order method for pricing
+  of financial derivatives using radial basis function generated finite
+  differences}, Mathematics and Computers in Simulation, 174 (2020),
+  pp.~205--217.
+
+\bibitem{Salmi14a}
+{\sc S.~Salmi and J.~Toivanen}, {\em I{MEX} schemes for pricing options under
+  jump-diffusion models}, Appl. Numer. Math., 84 (2014), pp.~33--45.
+
+\bibitem{vonSydow13}
+{\sc L.~von Sydow}, {\em On discontinuous galerkin for time integration in
+  option pricing problems with adaptive finite differences in space}, in
+  Numerical Analysis and Applied Mathematics: ICNAAM 2013, vol.~1558 of AIP
+  Conference Proceedings, American Institute of Physics (AIP), Melville, NY,
+  2013, pp.~2373--2376.
+
+\bibitem{von2015benchop}
+{\sc L.~von Sydow, L.~Josef~H{\"o}{\"o}k, E.~Larsson, E.~Lindstr{\"o}m,
+  S.~Milovanovi{\'c}, J.~Persson, V.~Shcherbakov, Y.~Shpolyanskiy,
+  S.~Sir{\'e}n, J.~Toivanen, et~al.}, {\em Benchop--the benchmarking project in
+  option pricing}, International Journal of Computer Mathematics, 92 (2015),
+  pp.~2361--2379.
+
+\end{thebibliography}
