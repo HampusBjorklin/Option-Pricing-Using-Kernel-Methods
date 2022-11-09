@@ -22,20 +22,18 @@ OptSpec = {'call'};
 Strike = 42;
 AmericanOpt = 1; % American option
 
-M1 = 5;
-M2 = 5;
-m1_stock_prices = 10*(1:M1)
-m2_stock_prices = 10*(1:M2)
+M1 = 10;
+M2 = 10;
+m1_stock_prices = 10*1:M2;
+m2_stock_prices = 10*1:M2;
 price_mesh = zeros(M1, M2);
 
 for i = 1:M1
     for j = 1:M2
-        AssetPrice =  [m1_stock_prices(i); m2_stock_prices(j)]; 
+        AssetPrice =  [m1_stock_prices(i);m2_sto]; 
         BasketStockSpec = basketstockspec(Volatility, AssetPrice, Quantity, Corr);
-        price_mesh(i, j) = basketbyls(RateSpec, BasketStockSpec, OptSpec, Strike, Settle, Maturity,...
+        price_mesh = basketbyls(RateSpec, BasketStockSpec, OptSpec, Strike, Settle, Maturity,...
             'EuropeanOpt',AmericanOpt)
     end
 end
-
-mesh(m1_stock_prices, m2_stock_prices, price_mesh)
 
