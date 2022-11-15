@@ -1,72 +1,56 @@
 % clear all; close all; clc;
 clear all; clc;
-n_list = [10:1:50];
+n_list = [30];
 % n_list = [29];
 % n_list = [10, 15, 20, 25, 30];
 % n_list = 20:20:100;
 n_size = length(n_list);
 e = zeros(n_size, 1);
-domain = [0, 100];
+domain = [0, 1];
 tic
 for n = n_list
-    %n = 10; 
     N = 2*n + 1;
-
-    anchor = 50;
+    
+    anchor = 0.4;
     
     X = zeros(1, N);
+    Xgf = zeros(N,1);
     x = linspace(domain(1), domain(2),n+1);
     y = linspace(domain(1), domain(2),n+1);
     
     anchInd = find(x >= anchor, 1);
-    % anchor = x(anchInd);
-    
-%     if anchor == domain(1)
-%         x = x(2:end);
-%         y = y(2:end);
-%     elseif anchor == domain(2)
-%         x = x(1:end-1);
-%         y = y(1:end-1);
-%     else
-%         % if min(size(find(x >= anchor, 1))) == 0
-            pts = round((n+1)*(anchor-domain(1))/(domain(2)-domain(1)));
-            l1 = linspace(domain(1), anchor, pts);
-            l2 = linspace(anchor, domain(2), n - pts+2);
-            x = [l1(1:end-1) l2(2:end)];
-            y = [l1(1:end-1) l2(2:end)];
-%             x = [x(1:anchInd-1), anchor, x(anchInd: end)];
-%             y = [y(1:anchInd-1), anchor, y(anchInd: end)];
+    pts = round((n+1)*(anchor-domain(1))/(domain(2)-domain(1)));
+    l1 = linspace(domain(1), anchor, pts);
+    l2 = linspace(anchor, domain(2), n - pts+2);
+    x = [l1(1:end-1) l2(2:end)];
+    y = [l1(1:end-1) l2(2:end)];
 
-%         else
-%             x = [x(1:anchInd-1), x(anchInd+1: end)];
-%             y = [y(1:anchInd-1), y(anchInd+1: end)];
-%         end
-%    end
     
-    X = [[x',anchor*ones(n,1)]; [anchor, anchor]; [anchor*ones(n,1), y']];
-%     tmp = [X(1:find(X > anchor, 1)-1, 1); X(n+1, 1); X(find(X > anchor, 1):n, 1)];
-%     tmp(2:end) - tmp(1:end-1)
-
+    X = [[x',anchor*ones(n,1)]; [anchor, anchor]; [anchor*ones(n,1), y']; [0, 1]; [1,0]];
+    
     f = @(x1,x2) x1.^2 + x2.^2 + 13*x2.^4;
-    % f = @(x1,x2) x1 + x2 + cos(x1 + x2);
+%     f = @(x1, x2) basketsolver(x1, x2);
+    %f = @(x1,x2) x1 + x2 + cos(x1 + x2);
     % f = @(x1,x2) 10*x1.^2 + 10*x2.^2;
     m = 4;
-    Xgf = f(X(:,1), X(:,2));
+    for i = 1:N
+        Xgf(i) = f(X(i,1), X(i,2));
+    end
     % Xgf = basketsolver(X);
     % f = @(x1, x2) basketSolverSingle([x1, x2]);
     A = zeros(N,N);
     
     for i = 1:N
-       for j = 1:N
-          A(i,j) = RepKernel(X(i,:), X(j,:), m, anchor);
-       end
+        for j = 1:N
+            A(i,j) = RepKernel(X(i,:), X(j,:), m, anchor);
+        end
     end
     
     alpha = A\Xgf;
     
     
     % points = [domain(1):0.1:domain(2) ; domain(1):0.1:domain(2)]';
-    stepping = (domain(2)-domain(1))/11;  % Om n är en multipel av nämnaren ger det låga fel
+    stepping = (domain(2)-domain(1))/20;  % Om n är en multipel av nämnaren ger det låga fel
     points = [domain(1):stepping:domain(2) ; domain(1):stepping:domain(2)]';
     sz = length(points(:,1));
     sf = zeros(sz,sz);
@@ -90,5 +74,17 @@ for n = n_list
     disp(max(max(abs(true_val - sf))))
     toc
 end
+%%
+convPlot(n_list,e, randi(2000))
+figure(randi(2000))
+surf(points(:,1), points(:,2), sf-true_val)
+title("Error over grid: m = "+ num2str(m) + ", n = " + num2str(n) + ", Anchor = " + num2str(anchor))
+figure(randi(2000))
+surf(points(:,1), points(:,2), sf)
+title("Computed solution")
 
-convPlot(n_list,e, 1)
+figure(randi(2000))
+surf(points(:,1), points(:,2), true_val)
+title("True Solution")
+
+
