@@ -1,4 +1,4 @@
-function [price] = basketSolverSingle(x, y)
+function [price] = basketSolverSingle(x, y, Strike)
 
     Settle = datetime(2009,5,1);
     Maturity  = datetime(2012,5,1);
@@ -21,7 +21,6 @@ function [price] = basketSolverSingle(x, y)
         
         % Compute the price of the call basket option
         OptSpec = {'call'};
-        Strike = 50;
         AmericanOpt = 0; % American option
         
         price = basketbyls(RateSpec, BasketStockSpec, OptSpec, Strike, Settle, Maturity,...

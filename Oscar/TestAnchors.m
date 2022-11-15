@@ -1,6 +1,6 @@
 % clear all; close all; clc;
 clear all; clc;
-anchor_list = linspace(45,55,41);
+anchor_list = linspace(45,55,61);
 % n_list = [29];
 % n_list = [10, 15, 20, 25, 30];
 % n_list = 20:20:100;
@@ -104,7 +104,11 @@ end
 %convPlot(anchor_list,e, 1)
 figure(2)
 plot(anchor_list, e2, '.')
-title("Inf norm")
+title("Inf norm, strike = 50")
+xlabel("Anchor position")
+ylabel("Norm value")
 figure(3)
 plot(anchor_list, e, '.')
-title("Max error")
+title("Max error, strike = 50")
+xlabel("Anchor position")
+ylabel("Norm value")

@@ -15,15 +15,24 @@ for n = n_list
     
     X = zeros(1, N);
     Xgf = zeros(N,1);
-    x = linspace(domain(1), domain(2),n+1);
-    y = linspace(domain(1), domain(2),n+1);
-    
-    anchInd = find(x >= anchor, 1);
-    pts = round((n+1)*(anchor-domain(1))/(domain(2)-domain(1)));
-    l1 = linspace(domain(1), anchor, pts);
-    l2 = linspace(anchor, domain(2), n - pts+2);
-    x = [l1(1:end-1) l2(2:end)];
-    y = [l1(1:end-1) l2(2:end)];
+
+    if anchor == domain(1)
+        x = linspace(domain(1), domain(2),n+1);
+        y = linspace(domain(1), domain(2),n+1);
+        x = x(2:end);
+        y = y(2:end);
+    elseif anchor == domain(2)
+        x = linspace(domain(1), domain(2),n+1);
+        y = linspace(domain(1), domain(2),n+1);
+        x = x(1:end-1);
+        y = y(1:end-1);
+    else
+        pts = round((n+1)*(anchor-domain(1))/(domain(2)-domain(1)));
+        l1 = linspace(domain(1), anchor, pts);
+        l2 = linspace(anchor, domain(2), n - pts+2);
+        x = [l1(1:end-1) l2(2:end)];
+        y = [l1(1:end-1) l2(2:end)];
+   end
 
     
     X = [[x',anchor*ones(n,1)]; [anchor, anchor]; [anchor*ones(n,1), y']; [0, 1]; [1,0]];
