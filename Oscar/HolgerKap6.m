@@ -8,12 +8,14 @@ n_size = length(n_list);
 e = zeros(n_size, 1);
 domain = [0, 1];
 Strike = 0.5;
-anchor = 0.51;
-steppingPoints = 11;
+anchor = 0.5;
+steppingPoints = 61;
 tic
 for n = n_list
     %n = 10; 
+    % N = 2*n + 1;
     N = 2*n + 1;
+    % N = 4*n + 1;
     % N = N + 2;
 
     X = zeros(1, N);
@@ -35,8 +37,13 @@ for n = n_list
         x = [l1(1:end-1) l2(2:end)];
         y = [l1(1:end-1) l2(2:end)];
    end
-    
     X = [[x',anchor*ones(n,1)]; [anchor, anchor]; [anchor*ones(n,1), y']];
+    % X = [flipud([x',anchor*ones(n,1)]); [anchor, anchor];[anchor*ones(n,1), y']];
+    % X = [[x',anchor*ones(n,1)]; [anchor, anchor];[anchor*ones(n,1), y']; [x', x']];
+    % X = [[x',x'];[anchor, anchor]; [x', fliplr(x)']];
+%     for i = 1:length(X)
+%         X(i, :) = [1, 1; 1, -1]*X(i, :)' + [-anchor; anchor]/sqrt(2);
+%     end
     % X = [[x',anchor*ones(n,1)]; [domain(1), domain(2)];[domain(2), domain(1)];[anchor, anchor]; [anchor*ones(n,1), y']];
     
 %     tmp = [X(1:find(X > anchor, 1)-1, 1); X(n+1, 1); X(find(X > anchor, 1):n, 1)];
@@ -78,32 +85,34 @@ for n = n_list
                 sf(k1,k2)= sf(k1,k2) + alpha(i) * (RepKernel([points(k1,1), points(k2,1)], X(i,:), m, anchor));
             end
             % sf(k1,k2)= sum(alpha .* (RepKernel([points(k1,1), points(k2,1)], X(:,:), m, anchor)));
-            true_val(k1,k2) = f(points(k1,1), points(k2,2));
+%             true_val(k1,k2) = f(points(k1,1), points(k2,2));
         end
     end
     
     % e(n==n_list) = norm(true_val - sf, inf);
-    e(n==n_list) = max(max(abs(true_val - sf)));
-    disp("Largest error for N = 10^" + num2str(log10(N)) + " is 10^" + num2str(log10(e(n==n_list))));
-    disp(max(max(abs(true_val - sf))))
+%     e(n==n_list) = max(max(abs(true_val - sf)));
+%     disp("Largest error for N = 10^" + num2str(log10(N)) + " is 10^" + num2str(log10(e(n==n_list))));
+%     disp(max(max(abs(true_val - sf))))
     toc
 end
 %%
-convPlot(n_list,e, randi(2000))
-figure(randi(2000))
-plot3(X(:,1),X(:,2), alpha/max(alpha)*max(sf-true_val, [], 'all'),'.')
-hold on
-surf(points(:,1), points(:,2), sf-true_val)
-title("Error over grid: m = "+ num2str(m) + ", n = " + num2str(n) + ", Anchor = " + num2str(anchor))
-hold off
+% % convPlot(n_list,e, randi(2000))
+% figure(randi(2000))
+% %plot3(repmat([1, 1]/sqrt(2), [N,1])*X, repmat([1, -1]/sqrt(2), [N,1])*X, alpha/max(alpha)*max(sf-true_val, [], 'all'),'.')
+% %hold on
+% surf(points(:,1), points(:,2), sf-true_val)
+% title("Error over grid: m = "+ num2str(m) + ", n = " + num2str(n) + ", Anchor = " + num2str(anchor))
+% %hold off
 
 figure(randi(2000))
-plot3(X(:,1),X(:,2), alpha/max(alpha)*max(sf, [], 'all'),'.')
-hold on
+%plot3(X(:,1),X(:,2), alpha/max(alpha)*max(sf, [], 'all'),'.')
+%hold on
 surf(points(:,1), points(:,2), sf)
-hold off
+%hold off
 title("Computed solution")
 
-figure(randi(2000))
-surf(points(:,1), points(:,2), true_val)
-title("True Solution")
+% figure(randi(2000))
+% surf(points(:,1), points(:,2), true_val)
+% title("True Solution")
+
+%%
