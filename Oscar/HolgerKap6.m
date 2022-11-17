@@ -10,7 +10,7 @@ domain = [0.00, 1];
 Strike = 0.5;
 % anchor = 0.5;
 % anchor = [0.5, 0.5];
-anchor = [0.40, 0.40];
+anchor = [0.55, 0.55];
 % anchor = [0.9, 0.9];
 dim = length(domain);
 steppingPoints = 11;
@@ -18,37 +18,40 @@ tic
 for n = n_list
     %n = 10; 
     % N = 2*n + 1;
-    N = 2*n + 1;
+    N = 3*n + 1;
     % N = 4*n + 1;
     % N = N + 2;
     X = zeros(N, 2);
 %     startpoints = [[0, anchor(2)]; [anchor(1), 0]];  % storlek linjer*dimension
 %     endpoints = [[1, anchor(2)]; [anchor(1), 1]];
-    theta = deg2rad(40);
+    theta = deg2rad(45);
     startpoints = rotatePoint([[anchor(1), 0]; [1, anchor(2)]]', anchor', theta)';  % storlek linjer*dimension
     endpoints = rotatePoint([[anchor(1), 1]; [0, anchor(2)]]', anchor', theta)';
 %     startpoints = rotatePoint([[0.5, 0]; [1, 0.5]]', anchor', theta)';  % storlek linjer*dimension
 %     endpoints = rotatePoint([[0.5, 1]; [0, 0.5]]', anchor', theta)';
-
+    startpoints = [startpoints, [anchor(1);0]];
+    endpoints = [endpoints, [anchor(1);1]];
+%     anchor = [anchor anchor(2)];
 %     startpoints = [[0, 0]; [1, 0]];  % storlek linjer*dimension
 %     endpoints = [[1, 1]; [0, 1]];
 %     startpoints = [[0, 0]; [1, 0.8]];  % storlek linjer*dimension
 %     endpoints = [[1, 1]; [0.8, 1]];
-    for i = 1:length(startpoints) % byt till rätt sätt att iterera
+    sz = size(startpoints);
+    for i = 1:sz(2) % byt till rätt sätt att iterera
         for d = 1:dim
-            if startpoints(i, d) == endpoints(i, d)
-                xi = ones(1, n)*startpoints(i, d);
+            if startpoints(d, i) == endpoints(d, i)
+                xi = ones(1, n)*startpoints(d, i);
             elseif anchor(d) == domain(1)
-                xi = linspace(domain(1), endpoints(i,d),n+1);
+                xi = linspace(domain(1), endpoints(d, i),n+1);
                 xi = xi(2:end);
             elseif anchor(d) == domain(2)
-                xi = linspace(startpoints(i,d), domain(2),n+1);
+                xi = linspace(startpoints(d, i), domain(2),n+1);
                 xi = xi(1:end-1);
             else
-                pts = round(abs((n+1)*(anchor(d)-startpoints(i,d)))...
-                    /abs((endpoints(i,d)-startpoints(i,d))));
-                l1 = linspace(startpoints(i,d), anchor(d), pts);
-                l2 = linspace(anchor(d), endpoints(i,d), n - pts+2);
+                pts = round(abs((n+1)*(anchor(d)-startpoints(d, i)))...
+                    /abs((endpoints(d, i)-startpoints(d, i))));
+                l1 = linspace(startpoints(d, i), anchor(d), pts);
+                l2 = linspace(anchor(d), endpoints(d, i), n - pts+2);
                 xi = [l1(1:end-1) l2(2:end)];
             end
             X(1+(i-1)*n:i*n, d) = xi;
@@ -70,7 +73,7 @@ for n = n_list
         Xgf(i) = f(X(i, 1), X(i, 2));
     end
 
-    m = 4;
+    m = 1;
     A = zeros(N,N);
     
     for i = 1:N
