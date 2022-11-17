@@ -9,7 +9,8 @@ e = zeros(n_size, 1);
 domain = [0.00, 1];
 Strike = 0.5;
 % anchor = 0.5;
-anchor = [0.5, 0.5];
+% anchor = [0.5, 0.5];
+anchor = [0.40, 0.40];
 % anchor = [0.9, 0.9];
 dim = length(domain);
 steppingPoints = 11;
@@ -23,10 +24,14 @@ for n = n_list
     X = zeros(N, 2);
 %     startpoints = [[0, anchor(2)]; [anchor(1), 0]];  % storlek linjer*dimension
 %     endpoints = [[1, anchor(2)]; [anchor(1), 1]];
-    theta = 0.3;
-    startpoints = [[0, 0]; [1, 0]];  % storlek linjer*dimension
-    endpoints = [[1, 1]; [0, 1]];
+    theta = deg2rad(40);
+    startpoints = rotatePoint([[anchor(1), 0]; [1, anchor(2)]]', anchor', theta)';  % storlek linjer*dimension
+    endpoints = rotatePoint([[anchor(1), 1]; [0, anchor(2)]]', anchor', theta)';
+%     startpoints = rotatePoint([[0.5, 0]; [1, 0.5]]', anchor', theta)';  % storlek linjer*dimension
+%     endpoints = rotatePoint([[0.5, 1]; [0, 0.5]]', anchor', theta)';
 
+%     startpoints = [[0, 0]; [1, 0]];  % storlek linjer*dimension
+%     endpoints = [[1, 1]; [0, 1]];
 %     startpoints = [[0, 0]; [1, 0.8]];  % storlek linjer*dimension
 %     endpoints = [[1, 1]; [0.8, 1]];
     for i = 1:length(startpoints) % byt till rätt sätt att iterera
@@ -40,8 +45,8 @@ for n = n_list
                 xi = linspace(startpoints(i,d), domain(2),n+1);
                 xi = xi(1:end-1);
             else
-                pts = round((n+1)*(anchor(d)-startpoints(i,d))...
-                    /(endpoints(i,d)-startpoints(i,d)));
+                pts = round(abs((n+1)*(anchor(d)-startpoints(i,d)))...
+                    /abs((endpoints(i,d)-startpoints(i,d))));
                 l1 = linspace(startpoints(i,d), anchor(d), pts);
                 l2 = linspace(anchor(d), endpoints(i,d), n - pts+2);
                 xi = [l1(1:end-1) l2(2:end)];
@@ -54,16 +59,16 @@ for n = n_list
 %     f = @(x1,x2) x1.^2 + x2.^2 + 13*x2.^4;
 %     f = @(x1,x2) x1.^2 + x2.^2 + 13*x2.^4 + 0*((2)).*(x1>x2);
 %     f = @(x1,x2) x1 + x2 + cos(x1 + x2);
-    f = @(x1,x2) x1.^2-x2.^2 + (x1>0.5).*ones(size(x1)); 
-
+%     f = @(x1,x2) x1.^2-x2.^2 + (x1>0.5).*ones(size(x1)); 
+% 
 %     f = @(x1,x2) 10*x1.^2 + 10*x2.^2;
-    Xgf = f(X(:,1), X(:,2));
+%     Xgf = f(X(:,1), X(:,2));
     
-%     f = @(x1, x2) basketSolverSingle(x1, x2, Strike);
-%     Xgf = zeros(N, 1);
-%     for i=1:N
-%         Xgf(i) = f(X(i, 1), X(i, 2));
-%     end
+    f = @(x1, x2) basketSolverSingle(x1, x2, Strike);
+    Xgf = zeros(N, 1);
+    for i=1:N
+        Xgf(i) = f(X(i, 1), X(i, 2));
+    end
 
     m = 4;
     A = zeros(N,N);
