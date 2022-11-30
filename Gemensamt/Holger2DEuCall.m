@@ -9,15 +9,14 @@ Ne = length(X_eval);    %Number of evaluation points
 N = dim*n + 1; % Total number of centerpoints 
 
 
-%Oskar cool way to fix the center points.
-x = linspace(0,1,n);
 % Scale down the Evalutaion points to region [0, 1]
 X_eval = X_eval./smax;
 K = K /smax;
 anchor = anchor/smax;
 
 %Obtain the set of center points
-X = [[x',anchor*ones(n,1)]; [anchor, anchor]; [anchor*ones(n,1), x']];
+% X = [[x',anchor*ones(n,1)]; [anchor, anchor]; [anchor*ones(n,1), x']];
+X = getXVector(anchor, n, 0);
 
 % Define boundary points
 distClose = 0;
@@ -36,24 +35,24 @@ farBC   = @(S,K,r,t) max(0.5*(S(:,1)+S(:,2))-K*exp(-r*t),0);
 %Find interior points
 XInter = X(indInter,:);
 NInter = length(indInter);
-XX = spdiags(X(indInter,1),0,NInter,NInter);
-YY = spdiags(X(indInter,2),0,NInter,NInter);
+XX = spdiags(X(:,1),0,N,N);
+YY = spdiags(X(:,2),0,N,N);
 
 
 %Local Differentiation matrices
-A0 = zeros(NInter, NInter); Ax = zeros(NInter, NInter);
-Ay = zeros(NInter, NInter); Axx = zeros(NInter, NInter);
-Axy = zeros(NInter, NInter); Ayy = zeros(NInter, NInter);
+A0 = zeros(N, N); Ax = zeros(N, N);
+Ay = zeros(N, N); Axx = zeros(N, N);
+Axy = zeros(N, N); Ayy = zeros(N, N);
 
 eps2 = ep^2;
-for i = 1:NInter
-    for j = 1:NInter
-        A0(i, j) = RepKernel(XInter(i,:), XInter(j, :), eps2);
-        Ax(i, j) = Dx1RepKernel(XInter(i,:), XInter(j,:), eps2);
-        Ay(i, j) = Dx2RepKernel(XInter(i,:), XInter(j,:), eps2);
-        Axx(i, j) = Dxx1RepKernel(XInter(i,:), XInter(j,:), eps2);
-        Axy(i, j) = Dxx12RepKernel(XInter(i,:), XInter(j,:), eps2);  %This is zero in this case eksde
-        Ayy(i, j) = Dxx2RepKernel(XInter(i,:), XInter(j,:), eps2);
+for i = 1:N
+    for j = 1:N
+        A0(i, j) = RepKernel(X(i,:), X(j, :), eps2);
+        Ax(i, j) = Dx1RepKernel(X(i,:), X(j,:), eps2);
+        Ay(i, j) = Dx2RepKernel(X(i,:), X(j,:), eps2);
+        Axx(i, j) = Dxx1RepKernel(X(i,:), X(j,:), eps2);
+        Axy(i, j) = Dxx12RepKernel(X(i,:), X(j,:), eps2);  %This is zero in this case eksde
+        Ayy(i, j) = Dxx2RepKernel(X(i,:), X(j,:), eps2);
     end
 end
 
@@ -65,7 +64,8 @@ Operator = (r*XX*Ax + r*YY*Ay ...
        
 %Add Interiour operator at correct point in the Large operator
 L = spalloc(N,N,sum(NInter.^2));
-L(indInter, indInter) = L(indInter, indInter) + Operator;
+% L(indInter, indInter) = L(indInter, indInter) + Operator;
+L = Operator;
 
 %% Solver
 % Using the BDF2 function from Elisabeths kod. 
@@ -98,19 +98,13 @@ end
 % Vet ej om randpunkterna ska vara med när vi bestämmer eval.
 % Evaluation matrix
 E = zeros(Ne, N);
-Atot = zeros(N,N);
-for i = 1:N
-    for j = 1:N
-        Atot(i,j) = RepKernel(X(i,:), X(j,:), eps2);
-    end
-end
 for i = 1:Ne
     for j = 1:N
         E(i, j) = RepKernel(X_eval(i,:), X(j,:), eps2);
     end
 end
 % E = E/A0; %Want to transform from nodal representation
-E = E/Atot;
+E = E/A0;
 % Solution
 U = E*u;
 %Rescale 
