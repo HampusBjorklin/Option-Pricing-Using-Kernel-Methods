@@ -1,0 +1,182 @@
+%----------------PACKAGES---------------------------------------------
+\documentclass[a4paper]{article}      %Dokumentklass
+\usepackage{babelbib}
+\usepackage{indentfirst}
+\usepackage[english, swedish]{babel}
+\usepackage[T1]{fontenc}                    %Anger standardtypsnitt
+\usepackage[utf8]{inputenc}                 %Definierar kodningsspråk
+\usepackage[font={small,it}]{caption}		  %Storlek, italic caption
+\usepackage[font={footnotesize,it}]{subcaption}%Storlek, italic caption
+\usepackage{graphicx}                          %Krävs för figurer
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+\usepackage{mathabx}
+\usepackage{tocloft}
+\usepackage{booktabs, multirow}
+\renewcommand{\arraystretch}{1.2}
+\usepackage{epstopdf}
+
+\usepackage{physics}
+\usepackage{pgfplots} 
+\pgfplotsset{compat=newest} 
+\pgfplotsset{plot coordinates/math parser=false} 
+\newlength\figureheight 
+\newlength\figurewidth 
+\usepackage{fullpage}                       %Mindre marginaler
+\usepackage{setspace}                       %Kan öka radavstånd
+\usepackage{float}                          %För att flytta figurer bl.a
+\usepackage{parskip}                        %Blankrad inte indrag
+\usepackage{amsmath}                        %Matematik
+\usepackage{units}                          %Matematik
+\usepackage{textcomp}                       %Tecken
+\usepackage{titlesec}						%Formaterar section, subsec...
+\usepackage[normalem]{ulem}					%Tillåter understryket
+\usepackage{url}                            %För hyperlänkar
+\usepackage{float}
+
+\usepackage[toc,page]{appendix}	%Bilagor
+\usepackage[final]{pdfpages} %pdf import
+
+\usepackage[justification=centering]{caption}
+\usepackage[font=small]{caption}
+\usepackage{caption}
+
+\begin{document}
+
+Solving the Black Scholes PDE with Holger's reproducing kernel. In this example, MQ kernel is used. The two-dimensional PDE is approximated with collecting of order-one-functions. 
+
+For $d$ dimensions, $\vec{x} \in [0\; 1]^d$.
+
+Define the desired evaluation points $X_E = \bigl\{ \vec{x_1}, \vec{x_2}, \vec{x_3}, ..., \vec{x_{N_e}} \bigr\}$
+and the set of anchored sample points  $X_N = \bigl\{ (x_1, a_y), (x_2, a_y),...,(x_n, a_y), (a_x, a_y), (a_x, y_1),...,(a_x, y_n) \bigr\}$
+with $ 0 < x_i, y_i, < 1 $.
+PDE, equation \ref{ekv:PDE}.
+
+\begin{equation}
+    \begin{aligned}
+        &\frac{\partial u}{\partial t} + \frac{1}{2} \sum_{i, j}^d \mathbf{C}_{i,j} x_i x_j \frac{\partial^2 u}{\partial x_1 \partial x_2} + \sum_{i}^d r x_i \frac{\partial u}{\partial x_i} - ru = 0 \quad &\vec{x} \in [0\,1]^d, t \in [0, T] \\
+        &u(\vec{x},t) = \mathrm{max}(\frac{1}{d}\sum^d x_i - K, 0) &t = T \\
+        &u(\vec{x},t) =  &||\vec{x}|| > 1, t \in [0, T] \\
+        &u(\vec{x}, t) = 0 &||\vec{x}|| = 0, t \in [0, T] \\
+    \end{aligned}
+    \label{ekv:PDE}
+\end{equation}
+
+%This is a comment
+We have different sets of values.
+\begin{itemize}
+\item Evaluation points  $X_{eval} = \left\{ (x_i, y_i) \right\}_i ^ {N_e}$
+\item Anchored center points $X = \left\{ (x_i, y_i) \right\}_i ^ {N}$ 
+\item Inner points $X_{inner}\subseteq X,\left\{ (x_i, y_i) \right\}_i ^ {N_inner}$
+\item Far and close points, where boundary condition apply
+$X_{far}, X_{close} \subseteq X,\left\{ (x_i, y_i) \right\}_i ^ {N_{far}}, \left\{ (x_i, y_i) \right\}_i ^ {N_{close}}$
+\end{itemize}
+We get that $N = N_{inner} + N_{far} + N_{close}$
+
+\section*{Reproducing kernel}
+The reproducing kernel is for the 2D case defines as follows.
+\begin{equation}
+	\begin{gathered}
+	R(\vec{x}^1, \vec{x}^2) = 1 + k({x}^1_1, {x}^2_1) + k({x}^1_2, {x}^2_2) \\
+	k(x_1, x_2) = \sqrt{1 + \varepsilon^2 ||x_1 - x_2||_2^2}
+	\end{gathered}
+	\label{ekv:RepKernel}
+\end{equation}
+From equation \ref{ekv:RepKernel} we can define the following matrix.
+\begin{equation}
+\mathbf{A_0} = \left[R(\vec{x}^j, \vec{x}^k)\right] _{\vec{x}_j,\vec{x}_k \in X} 
+\end{equation}
+Followingly, the derived reproducing kernels with associated matrix may be built.
+\begin{equation}
+	\begin{gathered}
+	\partial_{x_i} R(\vec{x}^j, \vec{x}^k) = \frac{\varepsilon^2(x_i^j - x_i^k)}{\sqrt{1 + \varepsilon^2||x_i^j - x_i^k||^2}} \Rightarrow  \mathbf{A_1}, \mathbf{A_2} \\[5pt]
+	\partial^2_{x_ix_i} R(\vec{x}^j, \vec{x}^k) = \frac{\varepsilon^2}{(1 + \varepsilon^2||x_i^j - x_i^k||^2)^{3/2}} \Rightarrow  \mathbf{A_{11}}, \mathbf{A_{22}} \\[5pt]
+	\partial^2_{x_ix_j} R(\vec{x}^j, \vec{x}^k) = 0  \Rightarrow \mathbf{A_{12}} 
+	\end{gathered}
+\end{equation}
+
+The projected approximation of a function $f(\vec{x})$ at a arbitrary set of evaluation points (may be the same as center points).
+\begin{equation}
+	\underbrace{\hat{f}(X_{eval})}_{R^{Ne \times 1}} =
+	\underbrace{ 
+	\left[R(\vec{x}_i, \vec{x}_j)  				\right]_{\vec{x}_i \in X_{eval}, \vec{x}_j \in X} 	}_{R^{Ne \times N}}	
+	\cdot 
+	\underbrace{
+	\mathbf{A_0}^{-1}
+	}_{R^{N\times N}}
+	\underbrace{ 
+	f(X)
+	}_{R^{N \times 1 }}
+	\label{ekv:EvalForm}
+	\end{equation} 
+
+From equation \ref{ekv:EvalForm}, the way to approximate the 2D Black Scholes operator becomes.
+\begin{gather}
+\begin{aligned}
+ \mathcal{O}_{BS} =& ( rX_1^1 \mathbf{A_1} + rX_2^2 \mathbf{A_2} \\
+&+ \frac{1}{2} \sigma_1^2 (X_1^1)^2 \mathbf{A_{11}} 
++ \frac{1}{2} \sigma_2^2 (X_2^2)^2 \mathbf{A_{22}} \\
+&+ \rho \sigma_1 \sigma_2 X_1^1 X_2^2 \mathbf{A_{12}} \\
+& - r\mathbf{A_0} ) \mathbf{A_0}^{-1} \\
+\end{aligned}
+\end{gather}   
+\section*{Coordinate Transformation}
+We want to rotate the coordinate system and solve the problem for $v_1, v_2$ instead of  $x_1, x_2$. The transformation is linear and equation \ref{ekv:2DervCoordinate} \& \ref{ekv:1DervCoordinate} is only applicable in the linear case. 
+\begin{gather}
+\vec{v} =
+\begin{bmatrix}
+\frac{1}{2} & \frac{1}{2} \\ \frac{1}{2} & \frac{-1}{2}
+\end{bmatrix}
+\vec{s} +
+\begin{bmatrix}
+0 \\ \frac{1}{2}
+\end{bmatrix} \\
+\frac{\partial^2 u}{\partial {x_i}\partial {x_j}} =
+\sum_{k,l = 1}^d 
+\left( 
+\frac{\partial^2 u}{\partial {v_k}\partial {v_l}}
+\frac{\partial v_l}{\partial {x_j}}
+\frac{\partial v_k}{\partial {x_i}}
+\right) \label{ekv:2DervCoordinate}\\
+\frac{\partial u}{\partial x_i}
+= \sum_k^d
+\left(
+\frac{\partial u}{\partial v_k}
+\frac{\partial v_k}{\partial x_i}
+\right) \label{ekv:1DervCoordinate}
+\end{gather}
+
+With this, we can rewrite equation \ref{ekv:PDE} in this new system.
+
+\begin{gather}
+\begin{aligned}
+ \mathcal{O}_{BS}^\mathcal{T} =& \Big( r(V_1^1 + V_2^2 - \frac{1}{2}) \mathbf{B_1} + r(V_1^1 - V_2^2 + \frac{1}{2}) \mathbf{B_2} \\
+&+ \frac{1}{2} \sigma_1^2 (V_1^1 + V_2^2 - \frac{1}{2})^2 \mathbf{B_{11}} 
++ \frac{1}{2} \sigma_2^2 (V_1^1 - V_2^2 + \frac{1}{2})^2 \mathbf{B_{22}} \\
+&+ \rho \sigma_1 \sigma_2 (V_1^1 + V_2^2 - \frac{1}{2}) (V_1^1 - V_2^2 + \frac{1}{2}) \mathbf{B_{12}} \\
+& - r\mathbf{B_0} \Big) \mathbf{B_0}^{-1} \\
+\end{aligned}
+\\
+\begin{cases}
+X_1^1 = (V_1^1 + V_2^2 - \frac{1}{2}) \\
+X_2^2 = (V_1^1 - V_2^2 + \frac{1}{2}) \\
+\mathbf{B_0} = \mathbf{A_0} \\
+\mathbf{B_1} = \frac{1}{2}(\mathbf{A_1} + \mathbf{A_2}) \\
+\mathbf{B_1} = \frac{1}{2}(\mathbf{A_1} - \mathbf{A_2}) \\
+\mathbf{B_{11}} = \frac{1}{4}(\mathbf{A_{11}} + 2\mathbf{A_{12}} + \mathbf{A_{22}}) \\
+\mathbf{B_{22}} = \frac{1}{4}(\mathbf{A_{11}} - 2\mathbf{A_{12}} + \mathbf{A_{22}}) \\
+\mathbf{B_{12}} = \frac{1}{2}(\mathbf{A_{11}} - \mathbf{A_{22}}) \\
+\end{cases}
+\end{gather}
+\section*{Time Solver (BDF2)}
+From earlier equations, we can define the system that should be solved at each timestep. Note that the set each point belongs to (Inner, Far) is still defined in terms of $x_1, x_2$.
+\begin{equation}
+	\begin{gathered}
+ 		\frac{\partial U_I}{\partial t} + \mathcal{O}_{BS}^\mathcal{T} U_I = 0 \\
+ 	U_I = \begin{bmatrix} 
+ 	u(\vec{x_i}, t) \\ 
+ 	\vdots \\
+	\end{bmatrix} _{\vec{x_i} \in X_{inner}}	 
+ 	\end{gathered} 	 
+\end{equation}
+\end{document}
