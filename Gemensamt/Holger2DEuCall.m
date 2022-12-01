@@ -15,7 +15,6 @@ K = K /smax;
 anchor = anchor/smax;
 
 %Obtain the set of center points
-% X = [[x',anchor*ones(n,1)]; [anchor, anchor]; [anchor*ones(n,1), x']];
 X = getXVector(anchor, n, 0);
 
 % Define boundary points
@@ -35,8 +34,7 @@ farBC   = @(S,K,r,t) max(0.5*(S(:,1)+S(:,2))-K*exp(-r*t),0);
 %Find interior points
 XInter = X(indInter,:);
 NInter = length(indInter);
-XX = spdiags(X(:,1),0,N,N);
-YY = spdiags(X(:,2),0,N,N);
+
 
 
 %Local Differentiation matrices
@@ -55,17 +53,26 @@ for i = 1:N
         Ayy(i, j) = Dxx2RepKernel(X(i,:), X(j,:), eps2);
     end
 end
-
+XX = spdiags(X(indInter,1),0,NInter,NInter);
+YY = spdiags(X(:,2),0,NInter,NInter);
+B0 = A0(indInter, :);
+Bx = Ax(indInter, :);
+By = Ay(indInter, :);
+Bxx = Axx(indInter, :);
+Bxy = Axy(indInter, :);
+Byy = Ayy(indInter, :);
 %Black schouls(?) Operator (This is for interiour points.
-Operator = (r*XX*Ax + r*YY*Ay ...
-           + 0.5*sig1^2*XX.^2*Axx ...
-           + rho*sig1*sig2*XX*YY*Axy ...
-           + 0.5*sig2^2*YY.^2*Ayy - r*A0)/A0;
+Operator = (r*XX*Bx + r*YY*By ...
+           + 0.5*sig1^2*XX.^2*Bxx ...
+           + rho*sig1*sig2*XX*YY*Bxy ...
+           + 0.5*sig2^2*YY.^2*Byy - r*B0)/A0;
        
+
 %Add Interiour operator at correct point in the Large operator
-L = spalloc(N,N,sum(NInter.^2));
-% L(indInter, indInter) = L(indInter, indInter) + Operator;
-L = Operator;
+
+L = zeros(N,N);
+L(indInter, :) = L(indInter, :) + Operator;
+
 
 %% Solver
 % Using the BDF2 function from Elisabeths kod. 
