@@ -154,7 +154,7 @@ With this, we can rewrite equation \ref{ekv:PDE} in this new system.
 &+ \frac{1}{2} \sigma_1^2 (V_1^1 + V_2^2 - \frac{1}{2})^2 \mathbf{B_{11}} 
 + \frac{1}{2} \sigma_2^2 (V_1^1 - V_2^2 + \frac{1}{2})^2 \mathbf{B_{22}} \\
 &+ \rho \sigma_1 \sigma_2 (V_1^1 + V_2^2 - \frac{1}{2}) (V_1^1 - V_2^2 + \frac{1}{2}) \mathbf{B_{12}} \\
-& - r\mathbf{B_0} \Big) \mathbf{B_0}^{-1} \\
+& - r\mathbf{B_0} \Big) \mathbf{A_0}^{-1} \\
 \end{aligned}
 \\
 \begin{cases}
@@ -165,7 +165,7 @@ X_2^2 = (V_1^1 - V_2^2 + \frac{1}{2}) \\
 \mathbf{B_1} = \frac{1}{2}(\mathbf{A_1} - \mathbf{A_2}) \\
 \mathbf{B_{11}} = \frac{1}{4}(\mathbf{A_{11}} + 2\mathbf{A_{12}} + \mathbf{A_{22}}) \\
 \mathbf{B_{22}} = \frac{1}{4}(\mathbf{A_{11}} - 2\mathbf{A_{12}} + \mathbf{A_{22}}) \\
-\mathbf{B_{12}} = \frac{1}{2}(\mathbf{A_{11}} - \mathbf{A_{22}}) \\
+\mathbf{B_{12}} = \frac{1}{4}(\mathbf{A_{11}} - \mathbf{A_{22}}) \\
 \end{cases}
 \end{gather}
 \section*{Time Solver (BDF2)}
