@@ -28,7 +28,7 @@ XT = [X(:,1) + X(:,2) - 1/2, X(:,1) - X(:,2) + 1/2];
 X_eval = [(X_eval(:,1) + X_eval(:,2))/2,(1+ X_eval(:,1) - X_eval(:,2))/2];
 % Define boundary points
 distClose = 0;
-distFar = 1.1;
+distFar = 1;
 range = sqrt(sum(XT.^2,2));
 indClose = find(range<=distClose);
 indFar = find(range>=distFar);
@@ -46,10 +46,6 @@ farBC   = @(S,K,r,t) max(0.5*(S(:,1)+S(:,2))-K*exp(-r*t),0);
 %Find interior points
 XInter = X(indInter,:);
 NInter = length(indInter);
-s1 = (X(:,1) + X(:,2) - 1/2);
-s2 = (X(:,1) - X(:,2) + 1/2);
-S1 = spdiags(s1,0,N,N);
-S2 = spdiags(s2,0,N,N);
 
 
 %Local Differentiation matrices
@@ -72,24 +68,33 @@ end
 
 %Black schouls(?) Operator (This is for interiour points.
 
-B0 = A0;
-Bx = 1/2.*(Ax + Ay);
-By = 1/2.*(Ax - Ay);
-Bxx = 1/2.*(1/2.*Axx + Axy + 1/2.*Ayy);
-Bxy = 1/2.*(Axx - Ayy);
-Byy = 1/2.*(1/2.*Axx - Axy + 1/2.*Ayy);
-Operator = (r*S1.*Bx + r*S2.*By ...
-           + 0.5*sig1^2.*S1.^2.*Bxx ...
-           + rho*sig1*sig2.*S1.*S2.*Bxy ...
-           + 0.5*sig2^2*S2.^2.*Byy - r.*B0)/B0;
+B0 = A0(indInter, :);
+Bx = 1/2.*(Ax(indInter, :) + Ay(indInter, :));
+By = 1/2.*(Ax(indInter, :) - Ay(indInter, :));
+Bxx = 1/2.*(1/2.*Axx(indInter, :) + Axy(indInter, :) + 1/2.*Ayy(indInter, :));
+Bxy = 1/4*(Axx(indInter, :) - Ayy(indInter, :));
+Byy = 1/2.*(1/2.*Axx(indInter, :) - Axy(indInter, :) + 1/2.*Ayy(indInter, :));
+
+s1 = (X(:,1) + X(:,2) - 1/2);
+s2 = (X(:,1) - X(:,2) + 1/2);
+S1 = spdiags(s1(indInter,1),0,NInter,NInter);
+S2 = spdiags(s2(indInter,1),0,NInter,NInter);
+
+
+
+Operator = (r*S1*Bx + r*S2*By ...
+           + 0.5*sig1^2*S1.^2*Bxx ...
+           + rho*sig1*sig2*S1*S2*Bxy ...
+           + 0.5*sig2^2*S2.^2*Byy - r*B0)/A0;
+% Operator should be R^N_inner x N
 %Add Interiour operator at correct point in the Large operator
-% L = spalloc(N,N,sum(NInter.^2));
-% L(indInter, indInter) = L(indInter, indInter) + Operator;
+L = zeros(N,N);
+L(indInter, :) = L(indInter, :) + Operator;
 
 %% Solver
 % Using the BDF2 function from Elisabeths kod. 
 [k,beta0,beta1,beta2]=BDF2coeffs(T,M);
-C = speye(N) - beta0*Operator; 
+C = eye(N) -beta0*L; 
  
 %Initialization
 u0 = farBC(XT, K, r, 0); %IC
@@ -98,7 +103,11 @@ rhs = u0;
 tvec = cumsum(k);
 % C(28,27) = -0.02;
 [Lc,Uc] = lu(C); %Tips?
+
+figure
 plot3(X(:,1), X(:,2), u0,"go");
+figure
+plot(X(:,1),X(:,2),"bo",X_eval(:,1),X_eval(:,2),"ro")
 %Time steppin'
 
 
