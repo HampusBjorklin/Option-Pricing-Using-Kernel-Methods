@@ -4,7 +4,7 @@
 close all; clear all; clc;
 %Ecomonic Parameters
 K=  20; % Strike
-T = 1; % Length of contract
+T = 10; % Length of contract
 r = 0.02; % Interest rate
 sig1 = 0.2; % Volatility asset 1
 sig2 = 0.15; % Volatility asset 2
@@ -13,16 +13,16 @@ rho = 0.5; % Correlation
 
 %Numerical Parameters
 dim = 2;
-n = 20; %Points in each dimention
+n = 30; %Points in each dimention
 N = dim*n + 1; %Total nr of points
-M = 40; %Number of timesteps.
-ep = 10; % Shape parameter
-anchor = [20; 20]; % Anchor, freezing point
+M = 50; %Number of timesteps.
+ep = 30; % Shape parameter
+anchor = [40; 80]; % Anchor, freezing point
 
 % Points for evaluation 
 smax = 4*dim*K;        %Largets value for simulation (center points)
-Eval_smin = 1/3*K*dim;  %Evalutaion min
-Eval_smax = 5/3*K*dim;  %Evaluation max
+Eval_smin = 1/3*dim*K;  %Evalutaion min
+Eval_smax = 5/3*dim*K;  %Evaluation max
 temp_x = linspace(Eval_smin,Eval_smax,41);
 [xx, yy] = meshgrid(temp_x);
 X_eval = [xx(:) yy(:)]; %Evaluation points 
@@ -34,9 +34,10 @@ tic
 [U,u, X, XT] = Holger2DEuCallTransform(X_eval,smax, K, T, r, sig1,sig2, rho, anchor, n, M, ep); %our
 toc
 
+N_spec = 41;
 % Truth
 tic
-True = BSeuCall2D_RBFPUM(X_eval,K,T,r,sig1,sig2,rho,N,M,ep,4,0.15); %Elisabeth
+True = BSeuCall2D_RBFPUM(X_eval,K,T,r,sig1,sig2,rho,N_spec,M,ep,1,0.15); %Elisabeth
 toc
 
 trudeau = reshape(True, size(xx));
