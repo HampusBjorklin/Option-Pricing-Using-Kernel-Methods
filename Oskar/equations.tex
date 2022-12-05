@@ -9,6 +9,8 @@
 \usepackage[font={footnotesize,it}]{subcaption}%Storlek, italic caption
 \usepackage{graphicx}                          %Krävs för figurer
 \usepackage{mathtools}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{mathrsfs}
 \usepackage{mathabx}
 \usepackage{tocloft}
@@ -55,9 +57,9 @@ PDE, equation \ref{ekv:PDE}.
 \begin{equation}
     \begin{aligned}
         &\frac{\partial u}{\partial t} + \frac{1}{2} \sum_{i, j}^d \mathbf{C}_{i,j} x_i x_j \frac{\partial^2 u}{\partial x_1 \partial x_2} + \sum_{i}^d r x_i \frac{\partial u}{\partial x_i} - ru = 0 \quad &\vec{x} \in [0\,1]^d, t \in [0, T] \\
-        &u(\vec{x},t) = \mathrm{max}(\frac{1}{d}\sum^d x_i - K, 0) &t = T \\
-        &u(\vec{x},t) =  &||\vec{x}|| > 1, t \in [0, T] \\
+        &u(\vec{x},t) = \phi(\vec{x}, t) = \mathrm{max}(\frac{1}{d}\sum^d x_i - Ke^{T-t}, 0)    &||\vec{x}|| > 1, t \in [0, T] \\
         &u(\vec{x}, t) = 0 &||\vec{x}|| = 0, t \in [0, T] \\
+        &u(\vec{x},t) = \phi(\vec{x},T) &t = T \\
     \end{aligned}
     \label{ekv:PDE}
 \end{equation}
@@ -85,13 +87,14 @@ The reproducing kernel is for the 2D case defines as follows.
 From equation \ref{ekv:RepKernel} we can define the following matrix.
 \begin{equation}
 \mathbf{A_0} = \left[R(\vec{x}^j, \vec{x}^k)\right] _{\vec{x}_j,\vec{x}_k \in X} 
+\label{ekv:A0}
 \end{equation}
 Followingly, the derived reproducing kernels with associated matrix may be built.
 \begin{equation}
 	\begin{gathered}
 	\partial_{x_i} R(\vec{x}^j, \vec{x}^k) = \frac{\varepsilon^2(x_i^j - x_i^k)}{\sqrt{1 + \varepsilon^2||x_i^j - x_i^k||^2}} \Rightarrow  \mathbf{A_1}, \mathbf{A_2} \\[5pt]
 	\partial^2_{x_ix_i} R(\vec{x}^j, \vec{x}^k) = \frac{\varepsilon^2}{(1 + \varepsilon^2||x_i^j - x_i^k||^2)^{3/2}} \Rightarrow  \mathbf{A_{11}}, \mathbf{A_{22}} \\[5pt]
-	\partial^2_{x_ix_j} R(\vec{x}^j, \vec{x}^k) = 0  \Rightarrow \mathbf{A_{12}} 
+	\partial^2_{x_ix_j} R(\vec{x}^j, \vec{x}^k) = 0  \Rightarrow \mathbf{A_{12}} \label{ekv:A12}
 	\end{gathered}
 \end{equation}
 
@@ -113,13 +116,22 @@ The projected approximation of a function $f(\vec{x})$ at a arbitrary set of eva
 From equation \ref{ekv:EvalForm}, the way to approximate the 2D Black Scholes operator becomes.
 \begin{gather}
 \begin{aligned}
- \mathcal{O}_{BS} =& ( rX_1^1 \mathbf{A_1} + rX_2^2 \mathbf{A_2} \\
-&+ \frac{1}{2} \sigma_1^2 (X_1^1)^2 \mathbf{A_{11}} 
-+ \frac{1}{2} \sigma_2^2 (X_2^2)^2 \mathbf{A_{22}} \\
-&+ \rho \sigma_1 \sigma_2 X_1^1 X_2^2 \mathbf{A_{12}} \\
-& - r\mathbf{A_0} ) \mathbf{A_0}^{-1} \\
+ \mathcal{O}_{BS} =& ( rX_1^1 \mathbf{B_1} + rX_2^2 \mathbf{B_2} \\
+&+ \frac{1}{2} \sigma_1^2 (X_1^1)^2 \mathbf{B_{11}} 
++ \frac{1}{2} \sigma_2^2 (X_2^2)^2 \mathbf{B_{22}} \\
+&+ \rho \sigma_1 \sigma_2 X_1^1 X_2^2 \mathbf{B_{12}} \\
+& - r\mathbf{B_0} ) \mathbf{A_0}^{-1} \\
 \end{aligned}
-\end{gather}   
+\\
+\begin{cases}
+\mathbf{B_0} = [\mathbf{A_0}]_{i\in N_{i},j \in N} \\
+\mathbf{B_1} = [\mathbf{A_1}]_{i\in N_{i},j \in N} \\
+\mathbf{B_2} = [\mathbf{A_2}]_{i\in N_{i},j \in N} \\
+\mathbf{B_{11}} = [\mathbf{A_{11}}]_{i\in N_{i},j \in N} \\
+\mathbf{B_{22}} = [\mathbf{A_{22}}]_{i\in N_{i},j \in N} \\
+\mathbf{B_{12}} = [\mathbf{A_{12}}]_{i\in N_{i},j \in N} \\
+\end{cases}
+\end{gather}
 \section*{Coordinate Transformation}
 We want to rotate the coordinate system and solve the problem for $v_1, v_2$ instead of  $x_1, x_2$. The transformation is linear and equation \ref{ekv:2DervCoordinate} \& \ref{ekv:1DervCoordinate} is only applicable in the linear case. 
 \begin{gather}
@@ -131,18 +143,18 @@ We want to rotate the coordinate system and solve the problem for $v_1, v_2$ ins
 \begin{bmatrix}
 0 \\ \frac{1}{2}
 \end{bmatrix} \\
-\frac{\partial^2 u}{\partial {x_i}\partial {x_j}} =
+\frac{\partial^2 u}{\partial {s_i}\partial {s_j}} =
 \sum_{k,l = 1}^d 
 \left( 
 \frac{\partial^2 u}{\partial {v_k}\partial {v_l}}
-\frac{\partial v_l}{\partial {x_j}}
-\frac{\partial v_k}{\partial {x_i}}
+\frac{\partial v_l}{\partial {s_j}}
+\frac{\partial v_k}{\partial {s_i}}
 \right) \label{ekv:2DervCoordinate}\\
-\frac{\partial u}{\partial x_i}
+\frac{\partial u}{\partial s_i}
 = \sum_k^d
 \left(
 \frac{\partial u}{\partial v_k}
-\frac{\partial v_k}{\partial x_i}
+\frac{\partial v_k}{\partial s_i}
 \right) \label{ekv:1DervCoordinate}
 \end{gather}
 
@@ -155,28 +167,79 @@ With this, we can rewrite equation \ref{ekv:PDE} in this new system.
 + \frac{1}{2} \sigma_2^2 (V_1^1 - V_2^2 + \frac{1}{2})^2 \mathbf{B_{22}} \\
 &+ \rho \sigma_1 \sigma_2 (V_1^1 + V_2^2 - \frac{1}{2}) (V_1^1 - V_2^2 + \frac{1}{2}) \mathbf{B_{12}} \\
 & - r\mathbf{B_0} \Big) \mathbf{A_0}^{-1} \\
-\end{aligned}
+\end{aligned} \label{ekv:OTransform}
 \\
 \begin{cases}
 X_1^1 = (V_1^1 + V_2^2 - \frac{1}{2}) \\
 X_2^2 = (V_1^1 - V_2^2 + \frac{1}{2}) \\
-\mathbf{B_0} = \mathbf{A_0} \\
-\mathbf{B_1} = \frac{1}{2}(\mathbf{A_1} + \mathbf{A_2}) \\
-\mathbf{B_1} = \frac{1}{2}(\mathbf{A_1} - \mathbf{A_2}) \\
-\mathbf{B_{11}} = \frac{1}{4}(\mathbf{A_{11}} + 2\mathbf{A_{12}} + \mathbf{A_{22}}) \\
-\mathbf{B_{22}} = \frac{1}{4}(\mathbf{A_{11}} - 2\mathbf{A_{12}} + \mathbf{A_{22}}) \\
-\mathbf{B_{12}} = \frac{1}{4}(\mathbf{A_{11}} - \mathbf{A_{22}}) \\
+\mathbf{B_0} = [\mathbf{A_0}]_{i\in N_{i},j \in N} \\
+\mathbf{B_1} = [\frac{1}{2}(\mathbf{A_1} + \mathbf{A_2})]_{i\in N_{i},j \in N} \\
+\mathbf{B_1} = [\frac{1}{2}(\mathbf{A_1} - \mathbf{A_2})]_{i\in N_{i},j \in N} \\
+\mathbf{B_{11}} = [\frac{1}{4}(\mathbf{A_{11}} + 2\mathbf{A_{12}} + \mathbf{A_{22}})]_{i\in N_{i},j \in N} \\
+\mathbf{B_{22}} = [\frac{1}{4}(\mathbf{A_{11}} - 2\mathbf{A_{12}} + \mathbf{A_{22}})]_{i\in N_{i},j \in N} \\
+\mathbf{B_{12}} = [\frac{1}{2}(\mathbf{A_{11}} - \mathbf{A_{22}})]_{i\in N_{i},j \in N} \\
 \end{cases}
+\label{ekv:BTransform}
 \end{gather}
 \section*{Time Solver (BDF2)}
-From earlier equations, we can define the system that should be solved at each timestep. Note that the set each point belongs to (Inner, Far) is still defined in terms of $x_1, x_2$.
+From earlier equations, we can define the system that should be solved at each timestep. Note that the set each point belongs to (Inner, Far) is still defined in terms of $x_1, x_2$. Reversing time $ \tau = T - t$ gives:
 \begin{equation}
-	\begin{gathered}
- 		\frac{\partial U_I}{\partial t} + \mathcal{O}_{BS}^\mathcal{T} U_I = 0 \\
- 	U_I = \begin{bmatrix} 
+\begin{aligned}
+	&U = \begin{bmatrix} 	
  	u(\vec{x_i}, t) \\ 
  	\vdots \\
-	\end{bmatrix} _{\vec{x_i} \in X_{inner}}	 
- 	\end{gathered} 	 
+	\end{bmatrix} _{\vec{x_i} \in X}  & \\
+ 	&\frac{\partial U}{\partial \tau} = \mathcal{O}_{BS}^\mathcal{T} U  &x_i \in X_{in}  \\	
+ 	&U = \phi(\vec{x_i}, \tau)  &x_i \in X_{far} \\
+ 	&U = 0 	&x_i \in X_{close} \\
+ 	\end{aligned} 	 
 \end{equation}
+Discretize the time $\vec{\tau} = \{\tau_m \}_{m = 1} ^ M$ with time step $ k_m = \tau_{m+1} - \tau_m$. The PDE is then expanded as:
+\begin{gather}
+U^{m+2} - \frac{4}{3}U^{m+1} + \frac{1}{3}U^{m} = \Delta \tau_m\mathcal{O}_{BS}^\mathcal{T} U^{m+2}  \qquad x_i \in X_{in} \\
+\Leftrightarrow (I -\Delta \tau_m\mathcal{O}_{BS}^\mathcal{T} )U^{m+2} =\frac{4}{3}U^{m+1} - \frac{1}{3}U^{m} \qquad x_i \in X_{in} \\
+\Leftrightarrow U^{m+2} = (I -\Delta \tau_m\mathcal{O}_{BS}^\mathcal{T})^{-1}(\frac{4}{3}U^{m+1} - \frac{1}{3}U^{m}) \qquad x_i \in X_{in} \\
+\end{gather}
+To eliminate the boundary conditions, the matrices are expanded to size $N \times N$. This new matrix, $C$, has identical rows to $(I -\Delta \tau_m\mathcal{O}_{BS}^\mathcal{T})$ for the indices corresponding with the interior points while being the identity matrix for the boundary rows. The boundary condition is then enforced by applying the respective condition to the boundary indices of the right-hand side. $U_{RHS} = (\frac{4}{3}U^{m+1} - \frac{1}{3}U^{m})$. This is done before solving the linear system. The final system is then given by.
+\begin{equation}
+\begin{gathered}
+U^{m+2} = C^{-1} U_{RHS} \qquad \vec{x_i} \in X \\
+\begin{cases}
+U_{RHS} = \frac{4}{3}U^{m+1} - \frac{1}{3}U^{m}, & \vec{x_i}  \in X_{in}\\
+U_{RHS} = 0, & \vec{x_i}  \in X_{close}\\
+U_{RHS} = \phi(\vec{x_i},\tau_{m+1}), & \vec{x_i}  \in X_{far}
+\end{cases}
+\end{gathered}
+\end{equation}
+
+\section*{Algorithm}
+\begin{algorithm}[H]
+    \centering
+    \caption{Pseudo code for solving BS}
+    \begin{algorithmic}[1]
+    		\State Scale ${X}_{eval}, K$ to and define problem on $[0, 1]^d]$
+    		\State Generate center points in transformed coordinates
+    		\State Obtain center points in standard system
+    		\State Find points corresponding to close and far boundary. 
+		\State Define $\mathbf{A}$ matrices, equation (\ref{ekv:A0}) - (\ref{ekv:A12}).     
+        \State With Matrices $A$, build the rotated local matrices $B$. Equation \ref{ekv:BTransform}.
+        \State Build the transform Black-Scholes operator $\mathcal{O}_{BS}$. Equation (\ref{ekv:OTransform}).
+        \State Extended $\mathcal{O}_{BS}$ to form matrix $C$, eliminating BC. $U_{m+1} = U_{m} = u_0$
+        \State Apply initial condition 
+        \For {$\tau_m$; m++}
+        \State $U_{temp} = C^{-1}U_{RHS}$
+        \State $U_{RHS} = \frac{4}{3}*U_{m+1} - \frac{1}{3}*U_{m}$
+        \State Apply boundary conditions: 
+        \State $\qquad U_{RHS}(\vec{x}\in X_{far}, \tau_{m+1}) = \phi(\vec{x}, \tau_m)$
+        \State $\qquad U_{RHS}(\vec{x}\in X_{close}, \tau_{m+1}) = 0$
+        \State Move solution along:
+        \State $\qquad U_{m} = U_{m+1}$
+        \State $\qquad U_{m+1} = U_{m+2}$
+        \State $\qquad U_{m+2} = U_{temp}$
+        \EndFor
+    \State Build evaluation matrix and evaluate solution in $X_{eval}$. Equation (\ref{ekv:EvalForm})
+    \State Rescale problem
+    \end{algorithmic}
+        \label{alg:1}
+\end{algorithm}
 \end{document}
