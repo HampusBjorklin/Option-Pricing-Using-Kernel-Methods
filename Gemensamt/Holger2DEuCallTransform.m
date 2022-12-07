@@ -21,11 +21,25 @@ x = linspace(0,1, n);
 X_eval = X_eval./smax;
 K = K /smax;
 
+
+f_s2v = @(S) [(S(:,1) + S(:,2))/2, ...
+                (S(:,1) - S(:,2))/2];
+            
+f_v2s = @(V)  [V(:,1) + V(:,2), ...
+                V(:,1) - V(:,2)];
+            
+
+            
+% f_v2s = @(X) [X(:,1) + X(:,2) - 1/2, ...
+%                 X(:,1) - X(:,2) + 1/2];
+%             
+% f_s2v = @(X) [(X(:,1) + X(:,2))/2, ...
+%                 (X(:,1) - X(:,2) + 1)/2];
 %Transform functions
-% Rotate = @(S) [(S(:,1) + S(:,2))/2, (1 + S(:,1) - S(:,2))/2];
+
 X = getXVector(anchor, n, 0);
-XT = [X(:,1) + X(:,2) - 1/2, X(:,1) - X(:,2) + 1/2];
-X_eval = [(X_eval(:,1) + X_eval(:,2))/2,(1+ X_eval(:,1) - X_eval(:,2))/2];
+XT = f_v2s(X);
+X_eval = f_s2v(X_eval);
 % Define boundary points
 distClose = 0;
 distFar = 1;
@@ -75,8 +89,9 @@ Bxx = 1/2.*(1/2.*Axx(indInter, :) + Axy(indInter, :) + 1/2.*Ayy(indInter, :));
 Bxy = 1/4*(Axx(indInter, :) - Ayy(indInter, :));
 Byy = 1/2.*(1/2.*Axx(indInter, :) - Axy(indInter, :) + 1/2.*Ayy(indInter, :));
 
-s1 = (X(:,1) + X(:,2) - 1/2);
-s2 = (X(:,1) - X(:,2) + 1/2);
+
+s1 = XT(:,1);
+s2 = XT(:,2);
 S1 = spdiags(s1(indInter,1),0,NInter,NInter);
 S2 = spdiags(s2(indInter,1),0,NInter,NInter);
 
