@@ -93,21 +93,21 @@ L(indInter, :) = L(indInter, :) + Operator;
 
 %% Solver
 % Using the BDF2 function from Elisabeths kod. 
-[k,beta0,beta1,beta2]=BDF2coeffs(T,M);
+
+k = T/(M-1);
+beta0 = k* 2/3;
+beta1 = 4/3;
+beta2 = 1/3;
+
 C = eye(N) -beta0*L; 
  
 %Initialization
 u0 = farBC(XT, K, r, 0); %IC
-tn = k(1);
 rhs = u0;
-tvec = cumsum(k);
-% C(28,27) = -0.02;
+tvec = 0:k:T;
+
 [Lc,Uc] = lu(C); %Tips?
 
-figure
-plot3(X(:,1), X(:,2), u0,"go");
-figure
-plot(X(:,1),X(:,2),"bo",X_eval(:,1),X_eval(:,2),"ro")
 %Time steppin'
 
 
@@ -116,7 +116,7 @@ for m = 1:M
     
     % BC at the next time level
     nextstep = min(M,m+1);
-    rhs = beta1(nextstep)*u - beta2(nextstep)*u0;
+    rhs = beta1*u - beta2*u0;
     
     tn = tvec(nextstep); % Should be one step ahead
     
