@@ -37,7 +37,7 @@ f_v2s = @(V)  [V(:,1) + V(:,2), ...
 %                 (X(:,1) - X(:,2) + 1)/2];
 %Transform functions
 
-X = getXVector(anchor, n, 0);
+X = getXVector(anchor, n);
 XT = f_v2s(X);
 X_eval = f_s2v(X_eval);
 % Define boundary points

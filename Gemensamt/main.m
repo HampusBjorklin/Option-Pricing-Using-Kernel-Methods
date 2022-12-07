@@ -20,15 +20,18 @@ M = 50; %Number of timesteps.
 
 
 % Points for evaluation 
-smax = 4*dim*K;        %Largets value for simulation (center points)
-Eval_smin = 1/3*dim*K;  %Evalutaion min
-Eval_smax = 5/3*dim*K;  %Evaluation max
+smax = 4*K;        %Largets value for simulation (center points)
+Eval_smin = 1/3*K;  %Evalutaion min
+Eval_smax = 5/3*K;  %Evaluation max
+% smax = 4*dim*K;        %Largets value for simulation (center points)
+% Eval_smin = 1/3*K*dim;  %Evalutaion min
+% Eval_smax = 5/3*K*dim;  %Evaluation max
 temp_x = linspace(Eval_smin,Eval_smax,41);
 [xx, yy] = meshgrid(temp_x);
 X_eval = [xx(:) yy(:)]; %Evaluation points 
 
 ep = 15; % Shape parameter
-anchor = [40; 80]; % Anchor, freezing point
+anchor = [20; 40]; % Anchor, freezing point
 % tic
 % [U,u, X] = Holger2DEuCall(X_eval,smax, K, T, r, sig1,sig2, rho, anchor, n, M, ep); %our
 % toc
@@ -68,7 +71,7 @@ hold on
 xlim([0.9*Eval_smin, 1.2*Eval_smax])
 ylim([0.9*Eval_smin, 1.2*Eval_smax])
 plot3(smax*XT(1:n,1),smax*XT(1:n,2),zeros(length(XT(1:n,1))),"r-")
-plot3(smax*XT(n+2:N,1),smax*XT(n+2:N,2),zeros(length(XT(1:n,1))),"r-")
+plot3(smax*XT(n+1:N-1,1),smax*XT(n+1:N-1,2),zeros(length(XT(1:n,1))),"r-")
 f1 = mesh(xx, yy, UU);
 title("Solution at Evaluation Points")
 view(3)
@@ -92,7 +95,7 @@ mesh(xx, yy,error)
 xlim([0.9*Eval_smin, 1.2*Eval_smax])
 ylim([0.9*Eval_smin, 1.2*Eval_smax])
 plot3(smax*XT(1:n,1),smax*XT(1:n,2),zeros(length(XT(1:n,1))),"r-")
-plot3(smax*XT(n+2:N,1),smax*XT(n+2:N,2),zeros(length(XT(1:n,1))),"r-")
+plot3(smax*XT(n+1:N-1,1),smax*XT(n+1:N-1,2),zeros(length(XT(1:n,1))),"r-")
 view(3)
 title("Absolute Error")
 
