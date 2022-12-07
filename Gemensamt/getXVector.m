@@ -1,6 +1,9 @@
 function [X] = getXVector(anchor, n)
 %GETXVECTOR Genererar X-vektorn
     dim = length(anchor);
+    if prod(size(anchor) == [1, dim])
+        anchor = anchor';
+    end
     startpoints = anchor.*(ones(dim));
     endpoints = anchor.*(ones(dim));
 
