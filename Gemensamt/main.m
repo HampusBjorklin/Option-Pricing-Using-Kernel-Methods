@@ -10,13 +10,30 @@ sig1 = 0.2; % Volatility asset 1
 sig2 = 0.1; % Volatility asset 2
 rho = 0.5; % Correlation
 
+n_default = 20;
+m_default = 50;
+
+variate = 'm';
+
+if variate == 'n'
+    n_vector = 5:5:25;
+    m_vector = m_default;
+    err_vector = zeros(size(n_vector));
+    
+elseif variate == 'm'
+    m_vector = 10:10:50;
+    n_vector = n_default;
+    err_vector = zeros(size(m_vector));
+    
+else
+    n_vector = n_default;
+    m_vector = m_default;
+    
+end
+
 
 %Numerical Parameters
 dim = 2;
-n_vector = 5:25; %Points in each dimention
-M = 50; %Number of timesteps.
-
-
 
 % Points for evaluation 
 smax = 4*K;        %Largets value for simulation (center points)
@@ -32,27 +49,38 @@ anchor = [40; 40]; % Anchor, freezing point
 % [U,u, X] = Holger2DEuCall(X_eval,smax, K, T, r, sig1,sig2, rho, anchor, n, M, ep); %our
 % toc
 index = 1;
-err_vector = zeros(size(n_vector));
 for n = n_vector
-    N = n*dim + 1;
-    tic
-    [U,u, X, XT] = Holger2DEuCallTransform(X_eval,smax, K, T, r, sig1,sig2, rho, anchor, n, M, ep); %our
-    toc
-    N_spec = 41;
-    % Truth
-    tic
-    True = BSeuCall2D_RBFPUM(X_eval,K,T,r,sig1,sig2,rho,N_spec,M,ep,1,0.15); %Elisabeth
-    toc
+    for m = m_vector
+        M = m;
+        N = n*dim + 1;
+        tic
+        [U,u, X, XT] = Holger2DEuCallTransform(X_eval,smax, K, T, r, sig1,sig2, rho, anchor, n, M, ep); %our
+        toc
+        N_spec = 41;
+        % Truth
+        tic
+        True = BSeuCall2D_RBFPUM(X_eval,K,T,r,sig1,sig2,rho,N_spec,M,ep,1,0.15); %Elisabeth
+        toc
 
-    trudeau = reshape(True, size(xx));
-    UU = reshape(U, size(xx));
-    error = (UU- trudeau);
-    rel_error = error./trudeau;
-    norm_rel_error = max(abs(error(:)));
-    err_vector(index) = norm_rel_error
-    index = index + 1;
+        trudeau = reshape(True, size(xx));
+        UU = reshape(U, size(xx));
+        error = (UU- trudeau);
+        rel_error = error./trudeau;
+        norm_rel_error = max(abs(error(:)));
+        err_vector(index) = norm_rel_error
+        index = index + 1;
+    end
 end
-q = rate_of_convergence(err_vector, n_vector)
+if variate == 'n'
+    q = -rate_of_convergence(err_vector, n_vector);
+    title('Convergence in n')
+elseif variate == 'm'
+    q = -rate_of_convergence(err_vector, m_vector);
+    title('Convergence in  m')
+end
+
+    
+legend('Error for different n (Log scale)', 'Q')
 % PLOTTTT!
 if exist("XT") == 0
    XT = X; 
