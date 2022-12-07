@@ -8,37 +8,32 @@ dim = 3;
 Ne = length(X_eval);    %Number of evaluation points
 N = dim*n + 1; % Total number of centerpoints 
 
-
-%Oscar cool way to fix the center points.
-domain = [0,1];
-if anchor == domain(1)
-    x = linspace(domain(1), domain(2),n+1);
-    y = linspace(domain(1), domain(2),n+1);
-    x = x(2:end);
-    y = y(2:end);
-elseif anchor == domain(2)
-    x = linspace(domain(1), domain(2),n+1);
-    y = linspace(domain(1), domain(2),n+1);
-    x = x(1:end-1);
-    y = y(1:end-1);
-else
-    pts = round((n+1)*(anchor-domain(1))/(domain(2)-domain(1)));
-    l1 = linspace(domain(1), anchor, pts);
-    l2 = linspace(anchor, domain(2), n - pts+2);
-    x = [l1(1:end-1) l2(2:end)];
-    y = [l1(1:end-1) l2(2:end)];
-end
-
 % Scale down the Evalutaion points to region [0, 1]
 X_eval = X_eval./smax;
 K = K /smax;
+anchor = anchor/smax;
 
 
-%Obtain the set of center points
-X = [[x',anchor*ones(n,1),anchor*ones(n,1)];
-     [anchor, anchor, anchor]; 
-     [anchor*ones(n,1), x',anchor*ones(n,1)];
-     [anchor*ones(n,1),anchor*ones(n,1), x']];
+%Transform functions
+% Rotate = @(S) [(S(:,1) + S(:,2))/2, (1 + S(:,1) - S(:,2))/2];
+X = getXVector(anchor, n);
+
+% f_s2v = @(S) [(S(:,1) + S(:,2))/2, ...
+%                 (S(:,1) - S(:,2))/2];
+%             
+% f_v2s = @(V)  [V(:,1) + V(:,2), ...
+%                 V(:,1) - V(:,2)];
+
+f_v2s = @(V) ([0.5, 1, 0.5; ...
+              -0.5, 1, -0.5;...
+              -1, 0, 1] * (V'))';
+f_s2v = @(S) 1/2.*([1, -1, -1;...
+                    1, 1, 0;...
+                    1, -1, 1] * (S'))';
+
+XT = fI(X);
+X_eval = f(X_eval);
+
 
 % Define boundary points
 distClose = 0;
@@ -63,13 +58,9 @@ ZZ = spdiags(X(indInter,2),0,NInter,NInter);
 
 
 %Local Differentiation matrices
-A0 = zeros(NInter, NInter); 
-Ax = zeros(NInter, NInter); Axx = zeros(NInter, NInter);
-Ay = zeros(NInter, NInter); Ayy = zeros(NInter, NInter);
-Az = zeros(NInter, NInter); Azz = zeros(NInter, NInter);
-Axy = zeros(NInter, NInter); 
-Axz = zeros(NInter, NInter); 
-Ayz = zeros(NInter, NInter); 
+A0 = zeros(N, N); Ax = zeros(N, N);
+Ay = zeros(N, N); Axx = zeros(N, N);
+Axy = zeros(N, N); Ayy = zeros(N, N);
 eps2 = ep^2;
 for i = 1:NInter
     for j = 1:NInter

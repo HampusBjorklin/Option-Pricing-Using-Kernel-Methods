@@ -1,7 +1,7 @@
 function [X] = getXVector(anchor, n, theta)
 %GETXVECTOR Roterar korset theta radianer runt ankaret
-    startpoints = rotatePoint([[anchor(1); 0], [1; anchor(2)]], anchor, theta);
-    endpoints = rotatePoint([[anchor(1); 1], [0; anchor(2)]], anchor, theta);
+    startpoints = rotatePoint([[anchor(1); -0.5], [1; anchor(2)]], anchor, theta);
+    endpoints = rotatePoint([[anchor(1); 0.5], [0; anchor(2)]], anchor, theta);
 
     sz = size(startpoints);
     dim = 2;

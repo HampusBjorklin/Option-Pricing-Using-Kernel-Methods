@@ -135,14 +135,11 @@ From equation \ref{ekv:EvalForm}, the way to approximate the 2D Black Scholes op
 \section*{Coordinate Transformation}
 We want to rotate the coordinate system and solve the problem for $v_1, v_2$ instead of  $x_1, x_2$. The transformation is linear and equation \ref{ekv:2DervCoordinate} \& \ref{ekv:1DervCoordinate} is only applicable in the linear case. 
 \begin{gather}
-\vec{v} =
+\vec{v} = \frac{1}{2}
 \begin{bmatrix}
-\frac{1}{2} & \frac{1}{2} \\ \frac{1}{2} & \frac{-1}{2}
+1 & 1 \\ 1 & -1
 \end{bmatrix}
-\vec{s} +
-\begin{bmatrix}
-0 \\ \frac{1}{2}
-\end{bmatrix} \\
+\vec{s} \\
 \frac{\partial^2 u}{\partial {s_i}\partial {s_j}} =
 \sum_{k,l = 1}^d 
 \left( 
@@ -242,4 +239,9 @@ U_{RHS} = \phi(\vec{x_i},\tau_{m+1}), & \vec{x_i}  \in X_{far}
     \end{algorithmic}
         \label{alg:1}
 \end{algorithm}
+
+
+\section*{Generalization}
+
+\subsection*{Repruducing Kernal}
 \end{document}

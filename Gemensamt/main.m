@@ -4,7 +4,11 @@
 close all; clear all; clc;
 %Ecomonic Parameters
 K=  20; % Strike
+<<<<<<< Updated upstream
 T = 0.1; % Length of contract
+=======
+T = 5; % Length of contract
+>>>>>>> Stashed changes
 r = 0.02; % Interest rate
 sig1 = 0.2; % Volatility asset 1
 sig2 = 0.1; % Volatility asset 2
@@ -19,18 +23,17 @@ M = 50; %Number of timesteps.
 
 
 
-% Points for evaluation 
+% Points for evaluation
 smax = 4*K;        %Largets value for simulation (center points)
 Eval_smin = 1/3*K;  %Evalutaion min
 Eval_smax = 5/3*K;  %Evaluation max
-% smax = 4*dim*K;        %Largets value for simulation (center points)
-% Eval_smin = 1/3*K*dim;  %Evalutaion min
-% Eval_smax = 5/3*K*dim;  %Evaluation max
+
 temp_x = linspace(Eval_smin,Eval_smax,41);
 [xx, yy] = meshgrid(temp_x);
-X_eval = [xx(:) yy(:)]; %Evaluation points 
+X_eval = [xx(:) yy(:)]; %Evaluation points
 
 ep = 15; % Shape parameter
+
 anchor = [20; 0]; % Anchor, freezing point
 % tic
 % [U,u, X] = Holger2DEuCall(X_eval,smax, K, T, r, sig1,sig2, rho, anchor, n, M, ep); %our
@@ -53,7 +56,7 @@ norm_rel_error = norm(rel_error,inf);
 
 % PLOTTTT!
 if exist("XT") == 0
-   XT = X; 
+    XT = X;
 end
 figure
 plot3(X(:,1), X(:,2), u, "ro")
@@ -119,12 +122,12 @@ r = 0.02; % Interest rate
 sig1 = 0.15;
 sig2 = 0.2;
 sig3 = 0.1;
-rho12 = 0.5; rho13 = 0.5; rho23 = 0.5; 
+rho12 = 0.5; rho13 = 0.5; rho23 = 0.5;
 rho21 = 0.5; rho31 = 0.5; rho32 = 0.5;
 
 C =     [sig1^2,          rho12*sig1*sig2,  rho13*sig1*sig2;
-         rho21*sig2*sig1, sig2^2,           rho23*sig1*sig2;
-         rho31*sig3*sig1, rho32*sig3*sig2,  sig3^2];
+    rho21*sig2*sig1, sig2^2,           rho23*sig1*sig2;
+    rho31*sig3*sig1, rho32*sig3*sig2,  sig3^2];
 
 %Numerical Parameters
 dim = 2;
@@ -134,7 +137,7 @@ M = 10; %Number of timesteps.
 ep = 10; % Shape parameter
 anchor = 0.12; % Anchor, freezing point
 
-% Points for evaluation 
+% Points for evaluation
 smax = 4*dim*K;        %Largets value for simulation (center points)
 Eval_smin = dim*1/3*K;  %Evalutaion min
 Eval_smax = dim*5/3*K;  %Evaluation max
