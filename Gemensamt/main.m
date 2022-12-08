@@ -4,11 +4,7 @@
 close all; clear all; clc;
 %Ecomonic Parameters
 K=  20; % Strike
-<<<<<<< Updated upstream
 T = 0.1; % Length of contract
-=======
-T = 5; % Length of contract
->>>>>>> Stashed changes
 r = 0.02; % Interest rate
 sig1 = 0.2; % Volatility asset 1
 sig2 = 0.1; % Volatility asset 2

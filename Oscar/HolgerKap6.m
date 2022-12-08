@@ -127,11 +127,8 @@ plot3(X(:,1), X(:, 2), Xgf, '.')
 
 [xx, yy] = meshgrid(points(:,1), points(:,2));
 figure(3)
-for i=1:length(points)
-    for j=1:length(points)
-        t_xy = f_xtr(xx(i, j), yy(i, j));
-        p_x(i, j) = t_xy(1);
-        p_y(i, j) = t_xy(2);
-    end
-end
-plot(p_x, p_y, '.')
+plot(points_x, points_y, 'ro')
+hold on
+XT = v(X(:, 1)', X(:,2)')';
+plot(XT(:, 1), XT(:,2), '.')
+hold off
