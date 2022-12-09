@@ -6,10 +6,10 @@ function [A] = GenerateCoordinateShiftVtoS(dim)
 A = eye(dim);
 for d = 2:dim
     Aloc = eye(dim);
-    Aloc(1,1) = 1/2;
-    Aloc(d,1) = 1/2;
-    Aloc(1, d) = 1/2;
-    Aloc(d,d) = -1/2;
+    Aloc(1,1) = 1;
+    Aloc(d,1) = 1;
+    Aloc(1, d) = 1;
+    Aloc(d,d) = -1;
     A = A * Aloc;
 end
 
