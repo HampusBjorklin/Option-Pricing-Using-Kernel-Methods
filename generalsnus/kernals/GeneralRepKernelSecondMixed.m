@@ -5,7 +5,7 @@ function rep_kernel = GeneralRepKernelSecondMixed(x,y, eps, der_dim, max_order)
 %eps is the shape parameter
 %der_dim is an array with the dimensions we take the derivate in
 
-d = length(x);
+d = size(x,2);
 
 if(nargin < 5)
     if d == 2
@@ -20,7 +20,7 @@ derivative_coeff = (eps^4)*(x(der_dim(1))-y(der_dim(1)))/(sqrt(eps^2*(x(der_dim(
     (x(der_dim(2))-y(der_dim(2)))/(sqrt(eps^2*(x(der_dim(2))-y(der_dim(2)))^2+1));
 
 %Multiquadric reproducing kernel function
-multi = @(a,b) sqrt(1+eps^2*(a-b)^2);
+multi = @(a,b) sqrt(1+eps^2*(a-b).^2);
 
 %Cell array of all subset combinations
 %s = cell(nr_of_subsets,d);
@@ -32,24 +32,24 @@ dim=dim(dim~=der_dim(2));
 
 for i=1:max_order-2
     subsets = nchoosek(dim,i);
-    for j = 1:length(subsets)
+    for j = 1:size(subsets,1)
         s(end+1) = {subsets(j,:)};
     end
 end
 
 if isempty(s) && max_order<2
-    rep_kernel = 0;
+    rep_kernel = zeros(size(x,1), 1);
 else
-    rep_kernel = 1; %+1 is always included
+   rep_kernel = ones(size(x,1), 1); %+1 is always included
     
     for i=1:length(s)
         arr = cell2mat(s(i));
         arr_len = length(arr);
         coeff = 1;
         for j=1:arr_len
-            coord_x = x(arr(j));
-            coord_y = y(arr(j));
-            coeff = coeff*multi(coord_x,coord_y);
+            coord_x = x(:,arr(j));
+            coord_y = y(:,arr(j));
+            coeff = coeff.*multi(coord_x,coord_y);
     
         end
         rep_kernel = rep_kernel + coeff;

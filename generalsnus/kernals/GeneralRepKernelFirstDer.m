@@ -5,7 +5,7 @@ function rep_kernel = GeneralRepKernelFirstDer(x,y, eps, der_dim, max_order)
 %eps is the shape parameter
 %der_dim is the dimension we take the derivate in
 
-d = length(x);
+d = size(x,2);
 
 if(nargin < 5)
     if d == 2
@@ -19,7 +19,7 @@ end
 derivative_coeff = (eps^2)*(x(der_dim)-y(der_dim))/(sqrt(eps^2*(x(der_dim)-y(der_dim))^2+1));
 
 %Multiquadric reproducing kernel function
-multi = @(a,b) sqrt(1+eps^2*(a-b)^2);
+multi = @(a,b) sqrt(1+eps^2*(a-b).^2);
 
 %Cell array of all subset combinations
 %s = cell(nr_of_subsets,d);
@@ -30,21 +30,21 @@ dim=dim(dim~=der_dim);
 
 for i=1:max_order-1
     subsets = nchoosek(dim,i);
-    for j = 1:length(subsets)
+    for j = 1:size(subsets,1)
         s(end+1) = {subsets(j,:)};
     end
 end
 
-rep_kernel = 1; %+1 is always included
+rep_kernel = ones(size(x,1), 1); %+1 is always included
 
 for i=1:length(s)
     arr = cell2mat(s(i));
     arr_len = length(arr);
     coeff = 1;
     for j=1:arr_len
-        coord_x = x(arr(j));
-        coord_y = y(arr(j));
-        coeff = coeff*multi(coord_x,coord_y);
+        coord_x = x(:,arr(j));
+        coord_y = y(:,arr(j));
+        coeff = coeff.*multi(coord_x,coord_y);
 
     end
     rep_kernel = rep_kernel + coeff;

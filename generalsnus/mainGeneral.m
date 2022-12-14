@@ -9,31 +9,37 @@ rho12 = 0.5; rho23 = 0.5; rho13 = 0.5;
 rho = 0.5;
 
 % Build C-matrix
-C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13;  %3D
-     sig2*sig1*rho12, sig2^2, sig2*sig3*rho23;
-     sig3*sig1*rho13, sig3*sig2*rho23, sig3^2];
-% 
-% C = [sig1^2, sig1*sig2*rho12; ...         #2D
-%     sig2*sig1*rho12, sig2^2];
+% C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13;  %3D
+%      sig2*sig1*rho12, sig2^2, sig2*sig3*rho23;
+%      sig3*sig1*rho13, sig3*sig2*rho23, sig3^2];
+
+C = [sig1^2, sig1*sig2*rho12; ...         #2D
+    sig2*sig1*rho12, sig2^2];
+
 
 %% Numerical Parameters
 
-dim = 3;
-maxOrder = 2;
+dim = 25;
+maxOrder = min(3,dim-1);
+% maxOrder = 2;
+C = 0.5*ones(dim);
+anchor = 23*ones(dim,1);
 
 n = 20; %Points in each dimention
 N = dim*n + 1; %Total nr of points
 M = 10; %Number of timesteps.
 ep = 15; % Shape parameter
-anchor = [23; 23; 23]; % Anchor, freezing point
+anchor = 23*ones(dim,1);%[23; 23;23]; % Anchor, freezing point
 
 %% Points for evaluation
 smax = 4*dim*K;        %Largets value for simulation (center points)
 Eval_smin = 0*K;  %Evalutaion min
-Eval_smax = 2*K;  %Evaluation max
-temp_x = linspace(Eval_smin,Eval_smax,10);
-[xx, yy, zz] = meshgrid(temp_x);
-X_eval = [xx(:) yy(:) zz(:)]; %Evaluation points
+Eval_smax = 4*K;  %Evaluation max
+temp_x = linspace(Eval_smin,Eval_smax,20);
+[xx, yy] = meshgrid(temp_x);
+% X_eval = [xx(:) yy(:)]; %Evaluation points
+X_eval = K*ones(1,dim);
+
 
 %% Run
 
@@ -43,6 +49,7 @@ toc
 
 
 %% Error and plotting
+return
 if dim == 3
     disp("Hallå där, kom ihåg att 'sann' data är gjord med specifika parametrar och är kanske inte samma som dom du kör nu!!")
     %Find max err.
@@ -72,7 +79,7 @@ if dim == 2
     trudeau = reshape(True, size(xx));
     UU = reshape(U, size(xx));
     error = (UU- trudeau);
-    err_rel = error ./ norm(error(:),2);
+    err_rel = error ./ norm(trudeau(:),2);
     disp("Maximum absolute error = " + num2str(max(abs(error(:)))));
     disp("Maximum relative error**** = " + num2str(max(abs(err_rel(:)))))
     

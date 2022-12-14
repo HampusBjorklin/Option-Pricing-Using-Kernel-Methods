@@ -9,7 +9,7 @@ if issymmetric(C) == 0 || length(C) ~= dim
     error("Parameter matrix is not symmetric, please fix :)")
 end
 
-Ne = length(X_eval);    %Number of evaluation points
+Ne = length(X_eval(:,1));    %Number of evaluation points
 N = dim*n + 1;          %Total number of centerpoints
 
 
@@ -36,9 +36,6 @@ X = getXVector(anchorT,n);  %In v
 XT = f_v2s(X);              %In s  %Tung
 
 X_eval = f_s2v(X_eval);     %In v
-
-figure
-plot(X(:,1), X(:,2), "ko", X_eval(:,1), X_eval(:,2),"bo")
 
 % Define boundary points
 distClose = 0.01;
@@ -80,27 +77,29 @@ A0 = zeros(N, N); %Always one of these :)
 
 %% Generate the matrices
 %A0
-for i = 1:N
-    for j = 1:N
-        A0(i, j) = GeneralRepKernel(X(i,:), X(j, :), ep, maxOrder);
-    end
-end
 
+[xx, yy] = meshgrid(1:N);
+A0 = GeneralRepKernel(X(xx(:),:), X(yy(:),:), ep, maxOrder);
+A0 = reshape(A0,N,N);
+% for i = 1:N
+%     for j = 1:N
+%         A0(i, j) = GeneralRepKernel(X(i,:), X(j, :), ep, maxOrder);
+%     end
+% end
 %Generate all derivative matrices. Note that there might be more mixed
 %derivatives than pure derivatives. Hence the split in for. The
 %secoundOrder struct is also structured followingly:
 % First "NPureSecondOrderTerms"- Pure derivatives then "NMixedTerms" mixed
 % derivative (this explains indexing)
-for i = 1:N
-    for j = 1:N
-        for k = 1:NFirstOrderTerms
-            firstOrder(k).matrix(i,j) = GeneralRepKernelFirstDer(X(i,:), X(j,:), ep, k, maxOrder);
-            secondOrder(k).matrix(i,j) = GeneralRepKernelSecondDer(X(i,:), X(j,:), ep, k, maxOrder);
-        end
-        for k = 1:NMixedTerms
-            secondOrder(k + NPureSecondOrderTerms).matrix(i,j) = GeneralRepKernelSecondMixed(X(i,:), X(j,:), ep, mixers(k,:), maxOrder);
-        end
-    end
+for k = 1:NFirstOrderTerms
+    tmp = GeneralRepKernelFirstDer(X(xx(:),:), X(yy(:),:), ep, k, maxOrder);
+    firstOrder(k).matrix = reshape(tmp,N,N);
+    tmp = GeneralRepKernelSecondDer(X(xx(:),:), X(yy(:),:), ep, k, maxOrder);
+    secondOrder(k).matrix = reshape(tmp,N,N);
+end
+for k = 1:NMixedTerms
+    tmp = GeneralRepKernelSecondMixed(X(xx(:),:), X(yy(:),:), ep, mixers(k,:), maxOrder);
+    secondOrder(k + NPureSecondOrderTerms).matrix = reshape(tmp,N,N);
 end
 
 %% Interiour Operators with Transform system
@@ -174,6 +173,7 @@ Operator = (Operator -r*B0)/A0; %(4)
 L = zeros(N,N);
 L(indInter, :) = L(indInter, :) + Operator;
 
+
 %% Time Solver
 % Using the BDF2 function.
 
@@ -215,12 +215,11 @@ end
 
 %% Obtain solution at Desired Evalutation Points
 % Evaluation matrix
-E = zeros(Ne, N);
-for i = 1:Ne
-    for j = 1:N
-        E(i, j) = GeneralRepKernel(X_eval(i,:), X(j,:), ep, maxOrder);
-    end
-end
+
+[xx, yy] = meshgrid(1:Ne,1:N);
+E = GeneralRepKernel(X_eval(xx(:),:), X(yy(:),:), ep, maxOrder);
+E = reshape(E,N,Ne)'; %Note that this wierdness is due to reshape placing columns first (we want rows :))
+                      % Not problem since other matrices are symemetric. lo
 E = E/A0;
 % Solution
 U = E*u;

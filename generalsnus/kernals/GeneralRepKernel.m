@@ -7,7 +7,7 @@ function rep_kernel = GeneralRepKernel(x,y, eps, max_order)
 
 %Cell array of all subset combinations
 %s = cell(nr_of_subsets,d);
-d = length(x);
+d = size(x,2);
 
 if(nargin < 4)
     if d == 2
@@ -22,24 +22,24 @@ s = {};
 dim = 1:d; %Vector with all dimensions
 for i=1:max_order
     subsets = nchoosek(dim,i);
-    for j = 1:length(subsets)
+    for j = 1:size(subsets,1)
         s(end+1) = {subsets(j,:)};
     end
 end
 
 %Multiquadric reproducing kernel function
-multi = @(a,b) sqrt(1+eps^2*(a-b)^2);
+multi = @(a,b) sqrt(1+eps^2*(a-b).^2);
 
-rep_kernel = 1; %+1 is always included
+rep_kernel = ones(size(x,1), 1); %+1 is always included
 
 for i=1:length(s)
     arr = cell2mat(s(i));
     arr_len = length(arr);
     coeff = 1;
     for j=1:arr_len
-        coord_x = x(arr(j));
-        coord_y = y(arr(j));
-        coeff = coeff*multi(coord_x,coord_y);
+        coord_x = x(:,arr(j));
+        coord_y = y(:,arr(j));
+        coeff = coeff.*multi(coord_x,coord_y);
     end
     rep_kernel = rep_kernel + coeff;
 end 
