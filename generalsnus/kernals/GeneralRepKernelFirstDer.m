@@ -16,7 +16,7 @@ if(nargin < 5)
 end
 
 %Function to determine coefficient in front of each derivative 
-derivative_coeff = (eps^2)*(x(der_dim)-y(der_dim))/(sqrt(eps^2*(x(der_dim)-y(der_dim))^2+1));
+derivative_coeff = (eps^2)*(x(:,der_dim)-y(:,der_dim))./(sqrt(eps^2*(x(:,der_dim)-y(:,der_dim)).^2+1));
 
 %Multiquadric reproducing kernel function
 multi = @(a,b) sqrt(1+eps^2*(a-b).^2);
@@ -50,7 +50,7 @@ for i=1:length(s)
     rep_kernel = rep_kernel + coeff;
 end 
 
-rep_kernel = derivative_coeff*rep_kernel;
+rep_kernel = derivative_coeff.*rep_kernel;
 
 end
 

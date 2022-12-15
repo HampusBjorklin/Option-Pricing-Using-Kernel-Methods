@@ -2,6 +2,7 @@ function [Di] = special_matmult(coeff, mat)
 %Multiplies a array of matrices [A, B, C...] with array
 % of coefficientns [a, b, c...] s.t the result is 
 % a*A + b*B + c*C...
+% coeff = coeff';
 szcoeff = length(coeff);
 sz = size(mat);
 mat_vec = reshape(mat, numel(mat)/szcoeff, szcoeff);

@@ -24,6 +24,7 @@ anchor = anchor/smax;
 MV2S = GCV2S(dim);
 MS2V = MV2S';
 
+
 f_s2v = @(S) (MS2V*S')';
 f_v2s = @(V) (MV2S*V')';
 
@@ -39,8 +40,8 @@ X_eval = f_s2v(X_eval);     %In v
 
 % Define boundary points
 distClose = 0.01;
-distFar = 0.9;
-range = sqrt(sum(XT.^2,2));             %Bug inga bortre punkter :S
+distFar = 0.99;
+range = sqrt(sum(XT.^2,2));             
 indClose = find(range<=distClose);
 indFar = find(range>=distFar);
 indInter = find(range>distClose & range<distFar);
@@ -80,12 +81,8 @@ A0 = zeros(N, N); %Always one of these :)
 
 [xx, yy] = meshgrid(1:N);
 A0 = GeneralRepKernel(X(xx(:),:), X(yy(:),:), ep, maxOrder);
-A0 = reshape(A0,N,N);
-% for i = 1:N
-%     for j = 1:N
-%         A0(i, j) = GeneralRepKernel(X(i,:), X(j, :), ep, maxOrder);
-%     end
-% end
+A0 = (reshape(A0,N,N))';
+
 %Generate all derivative matrices. Note that there might be more mixed
 %derivatives than pure derivatives. Hence the split in for. The
 %secoundOrder struct is also structured followingly:
@@ -93,13 +90,13 @@ A0 = reshape(A0,N,N);
 % derivative (this explains indexing)
 for k = 1:NFirstOrderTerms
     tmp = GeneralRepKernelFirstDer(X(xx(:),:), X(yy(:),:), ep, k, maxOrder);
-    firstOrder(k).matrix = reshape(tmp,N,N);
+    firstOrder(k).matrix = (reshape(tmp,N,N))';
     tmp = GeneralRepKernelSecondDer(X(xx(:),:), X(yy(:),:), ep, k, maxOrder);
-    secondOrder(k).matrix = reshape(tmp,N,N);
+    secondOrder(k).matrix = (reshape(tmp,N,N))';
 end
 for k = 1:NMixedTerms
     tmp = GeneralRepKernelSecondMixed(X(xx(:),:), X(yy(:),:), ep, mixers(k,:), maxOrder);
-    secondOrder(k + NPureSecondOrderTerms).matrix = reshape(tmp,N,N);
+    secondOrder(k + NPureSecondOrderTerms).matrix = (reshape(tmp,N,N))';
 end
 
 %% Interiour Operators with Transform system
@@ -121,9 +118,9 @@ D2_mat = zeros(NInter,N*NSecondOrderTerms);
 %The elements in the coeff-vector is taken from transformation matrix
 %Eventuellt så är detta lite oklart, men jävligt snygg one-liners
 % R^(1 x NFirstOrderTerms)
-D1_coeff = @(i) MS2V(i,1:dim);
+D1_coeff = @(i) [MS2V(1:dim,i)]';
 % R^(1 x NSecondOrderTerms)
-D2_coeff = @(i,j) [MS2V(i,1:dim).*MS2V(j,1:dim), MS2V(i,mixers(:,1)).*MS2V(j,mixers(:,2)) + MS2V(i,mixers(:,2)).*MS2V(j,mixers(:,1))];
+D2_coeff = @(i,j) [(MS2V(1:dim,i).*MS2V(1:dim,j)); MS2V(mixers(:,1),i).*MS2V(mixers(:,2),j) + MS2V(mixers(:,2), i).*MS2V(mixers(:,1), j)]';
 
 %Fill the Derivative Vector/Matrix
 for i = 1:NFirstOrderTerms
@@ -151,12 +148,12 @@ for i = 1:dim
 end
 
 %% Build the BS-Operator
-% dim terms are +r*V_i*D_i              (1)
-% dim terms are +0.5*V_i^2*C(i,i)*D_ii (2)
+% dim terms are +r*V_i*D_i                      (1)
+% dim terms are +0.5*V_i^2*C(i,i)*D_ii          (2)
 % NMixed terms are    +V_i*V_j*C(i,j)*D_ij      (3)
-% 1 term -r*D0     (4)
+% 1 term -r*D0                                  (4)
 Operator = zeros(NInter,N);
-for i = 1:dim %(1) (2)
+for i = 1:dim               %(1) (2)
     Operator = (Operator + r*SMatrices(i).matrix*BMatrices(i).matrix);
     Operator = Operator + 0.5*C(i,i)*(SMatrices(i).matrix).^2 ...
         * BMatrices(i + NFirstOrderTerms).matrix;
@@ -167,7 +164,7 @@ for i = 1:NMixedTerms %(3)
     Operator = Operator + C(ii,jj)*SMatrices(ii).matrix*SMatrices(jj).matrix ...
         *BMatrices(i + NFirstOrderTerms + NPureSecondOrderTerms).matrix;
 end
-Operator = (Operator -r*B0)/A0; %(4)
+Operator = (Operator - r*B0)/A0; %(4)
 
 %Add Interiour operator at correct indices in the Large operator
 L = zeros(N,N);
@@ -177,31 +174,30 @@ L(indInter, :) = L(indInter, :) + Operator;
 %% Time Solver
 % Using the BDF2 function.
 
-k = T/(M-1);
-beta0 = k* 2/3;
-beta1 = 4/3;
-beta2 = 1/3;
-
+% k = T/(M-1);
+% beta0 = k* 2/3;
+% beta1 = 4/3;
+% beta2 = 1/3;
+[k,beta0,beta1,beta2]=BDF2coeffs(T,M);
 %Used to elimitate BC
 C = eye(N) -beta0*L;
 
 %Initialization
 u0 = farBC(XT, K, r, 0); %IC
+u = u0;
 rhs = u0;
 tvec = 0:k:T;
 
 [Lc,Uc] = lu(C); %Split Matrix to increase speeeeeed
 
 %Time steppin'
-if T == 0
-    tvec = zeros(M,1);
-end
+if T ~= 0
 for m = 1:M
     u =Uc\(Lc\rhs);
     
     % BC at the next time level
     nextstep = min(M,m+1);
-    rhs = beta1*u - beta2*u0;
+    rhs = beta1(nextstep)*u - beta2(nextstep)*u0;
     
     tn = tvec(nextstep); % Should be one step ahead
     
@@ -211,7 +207,7 @@ for m = 1:M
     % move the solutions one step
     u0 = u;
 end
-
+end
 
 %% Obtain solution at Desired Evalutation Points
 % Evaluation matrix

@@ -2,7 +2,7 @@ clear all;close all; clc;
 disp("Saker testas alltid i denna kod, se till att du har kolla på vilka parametrar som du kör med")
 %% Ecomonic Parameters
 K=  20; % Strike
-T = 0.5; % Length of contract
+T = 0; % Length of contract
 r = 0.02; % Interest rate
 sig1 = 0.15; sig2 = 0.2; sig3 = 0.1;
 rho12 = 0.5; rho23 = 0.5; rho13 = 0.5;
@@ -19,26 +19,26 @@ C = [sig1^2, sig1*sig2*rho12; ...         #2D
 
 %% Numerical Parameters
 
-dim = 25;
-maxOrder = min(3,dim-1);
-% maxOrder = 2;
-C = 0.5*ones(dim);
-anchor = 23*ones(dim,1);
+dim = 2;
+% maxOrder = min(3,dim-1);
+maxOrder = 1;
+% C = 0.5*ones(dim);
+% % anchor = 23*ones(dim,1);
 
-n = 20; %Points in each dimention
+n = 30; %Points in each dimention
 N = dim*n + 1; %Total nr of points
 M = 10; %Number of timesteps.
-ep = 15; % Shape parameter
-anchor = 23*ones(dim,1);%[23; 23;23]; % Anchor, freezing point
+ep = 30; % Shape parameter
+anchor = 20*ones(dim,1);%[23; 23;23]; % Anchor, freezing point
 
 %% Points for evaluation
 smax = 4*dim*K;        %Largets value for simulation (center points)
-Eval_smin = 0*K;  %Evalutaion min
-Eval_smax = 4*K;  %Evaluation max
+Eval_smin = 1/3*K;  %Evalutaion min
+Eval_smax = 5/3*K;  %Evaluation max
 temp_x = linspace(Eval_smin,Eval_smax,20);
 [xx, yy] = meshgrid(temp_x);
-% X_eval = [xx(:) yy(:)]; %Evaluation points
-X_eval = K*ones(1,dim);
+X_eval = [xx(:) yy(:)]; %Evaluation points
+% X_eval = K*ones(1,dim);
 
 
 %% Run
@@ -49,7 +49,6 @@ toc
 
 
 %% Error and plotting
-return
 if dim == 3
     disp("Hallå där, kom ihåg att 'sann' data är gjord med specifika parametrar och är kanske inte samma som dom du kör nu!!")
     %Find max err.

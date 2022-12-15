@@ -21,6 +21,7 @@ x = linspace(0,1, n);
 X_eval = X_eval./smax;
 K = K /smax;
 
+% Mat = GCV2S(dim);
 %Transform functions
 f_s2v = @(S) [(S(:,1) + S(:,2))/2, ...
     (S(:,1) - S(:,2))/2];
@@ -30,13 +31,12 @@ f_v2s = @(V)  [V(:,1) + V(:,2), ...
 
 
 
-% f_v2s = @(X) [X(:,1) + X(:,2) - 1/2, ...
-%                 X(:,1) - X(:,2) + 1/2];
-%
+% f_v2s = @(V) (Mat*V')';
+% f_s2v = @(S) (Mat'*S')';
 % f_s2v = @(X) [(X(:,1) + X(:,2))/2, ...
 %                 (X(:,1) - X(:,2) + 1)/2];
 
-X = getXVector(anchor, n);
+X = getXVector(f_s2v(anchor'), n);
 XT = f_v2s(X);
 X_eval = f_s2v(X_eval);
 % Define boundary points
