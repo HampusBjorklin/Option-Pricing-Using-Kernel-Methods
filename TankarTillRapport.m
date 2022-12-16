@@ -8,3 +8,4 @@
     % Hur stor bör evalueringsytan vara?
     % Kika på diskontinuiteten och punkternas placering relativt den
     % Vad tar tid att köra? Vilka operationer är tunga?
+    % (Shape parameter?)

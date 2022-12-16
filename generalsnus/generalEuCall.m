@@ -33,10 +33,20 @@ anchorT = MS2V*anchor;
 
 
 %Center points
-X = getXVector(anchorT,n);  %In v
-XT = f_v2s(X);              %In s  %Tung
+X = getXVector(anchorT,n,maxOrder);  %In v
+
+% tm1 = linspace(0,1,n);
+% tm2 = linspace(-0.5,0.5,n);
+% [xx1,yy1] = meshgrid(tm1,tm2); % centers of partitions
+
+% X = [xx1(:) yy1(:)];
+% plot(X(:,1),X(:,2),"go")
+
+N = length(X);
+XT = f_v2s(X);              %In s
 
 X_eval = f_s2v(X_eval);     %In v
+
 
 % Define boundary points
 distClose = 0.01;
@@ -68,8 +78,6 @@ NSecondOrderTerms = dim + NMixedTerms;
 mixers = nchoosek(1:dim,2); %Create the order of mixed terms
 
 % Coeff -> Nodal (Always one)
-A0 = zeros(N, N); %Always one of these :)
-
 %First Order dervs A_1, A_2,...,A_d
 [firstOrder(1:NFirstOrderTerms).matrix] = deal(zeros(N));
 %Second order dervs A_11, A_22,.. ,A12,...., Ad-1d
@@ -222,4 +230,6 @@ U = E*u;
 %Rescale
 X_eval = X_eval*smax;
 U = U*smax; K = K*smax;
+X = X.*smax; XT = XT.*smax;
+u = u*smax;
 end
