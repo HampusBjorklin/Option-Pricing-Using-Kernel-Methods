@@ -1,16 +1,23 @@
 function [U, u, X, XT] = generalEuCall(X_eval, smax, K, T, r, C, anchor, n, M, ep, dim, maxOrder)
 % Calculates the fair option price at points X_eval using a reproducing
-% kernel and radial basis funtions. This one is in 3D :)
+% kernel and radial basis funtions
 
 
-% Kolla på Coeff functionerna och RepKernal
+% Detta bör göras
+% - Frigör minne under kodens gång. Det går också att minska
+% minnesanvändadet Skippa definitionssteg
+% - Ha kod som kollar om alla parametrar är legitima     
+% - Skriv om så alla vektorer är T? Många fnuttar överallt nu
+% -Kommentera lite?
+
+
 %Check parameter matrix
 if issymmetric(C) == 0 || length(C) ~= dim
     error("Parameter matrix is not symmetric, please fix :)")
 end
 
 Ne = length(X_eval(:,1));    %Number of evaluation points
-N = dim*n + 1;          %Total number of centerpoints
+N = calcN(dim,maxOrder,n);          %Total number of centerpoints
 
 
 % Scale down the Evalutaion points to region [0, 1]
@@ -35,21 +42,13 @@ anchorT = MS2V*anchor;
 %Center points
 X = getXVector(anchorT,n,maxOrder);  %In v
 
-% tm1 = linspace(0,1,n);
-% tm2 = linspace(-0.5,0.5,n);
-% [xx1,yy1] = meshgrid(tm1,tm2); % centers of partitions
-
-% X = [xx1(:) yy1(:)];
-% plot(X(:,1),X(:,2),"go")
-
-N = length(X);
 XT = f_v2s(X);              %In s
 
 X_eval = f_s2v(X_eval);     %In v
 
 
 % Define boundary points
-distClose = 0.01;
+distClose = 0.01; %Computers cant count
 distFar = 0.99;
 range = sqrt(sum(XT.^2,2));             
 indClose = find(range<=distClose);
@@ -182,11 +181,11 @@ L(indInter, :) = L(indInter, :) + Operator;
 %% Time Solver
 % Using the BDF2 function.
 
-% k = T/(M-1);
-% beta0 = k* 2/3;
-% beta1 = 4/3;
-% beta2 = 1/3;
-[k,beta0,beta1,beta2]=BDF2coeffs(T,M);
+k = T/(M-1);
+beta0 = k* 2/3;
+beta1 = 4/3;
+beta2 = 1/3;
+
 %Used to elimitate BC
 C = eye(N) -beta0*L;
 
@@ -205,7 +204,7 @@ for m = 1:M
     
     % BC at the next time level
     nextstep = min(M,m+1);
-    rhs = beta1(nextstep)*u - beta2(nextstep)*u0;
+    rhs = beta1*u - beta2*u0;
     
     tn = tvec(nextstep); % Should be one step ahead
     
@@ -223,11 +222,11 @@ end
 [xx, yy] = meshgrid(1:Ne,1:N);
 E = GeneralRepKernel(X_eval(xx(:),:), X(yy(:),:), ep, maxOrder);
 E = reshape(E,N,Ne)'; %Note that this wierdness is due to reshape placing columns first (we want rows :))
-                      % Not problem since other matrices are symemetric. lo
+
 E = E/A0;
 % Solution
 U = E*u;
-%Rescale
+%Rescale back
 X_eval = X_eval*smax;
 U = U*smax; K = K*smax;
 X = X.*smax; XT = XT.*smax;

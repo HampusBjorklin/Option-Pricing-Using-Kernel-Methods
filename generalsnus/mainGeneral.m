@@ -4,17 +4,32 @@ disp("Saker testas alltid i denna kod, se till att du har kolla på vilka paramet
 K=  20; % Strike
 T = 0.5; % Length of contract
 r = 0.02; % Interest rate
-sig1 = 0.15; sig2 = 0.2; sig3 = 0.1;
+sig1 = 0.15; sig2 = 0.2; sig3 = 0.1; sig4 = 0.2; sig5 = 0.12;
 rho12 = 0.5; rho23 = 0.5; rho13 = 0.5;
+rho14 = 0.5; rho24 = 0.5; rho34 = 0.5;
+rho15 = 0.5; rho25 = 0.5; rho35 = 0.5; rho45 = 0.5;
 rho = 0.5;
 % 
 % Build C-matrix
+
+% 
+% C = [sig1^2, sig1*sig2*rho12; ...         #2D
+%     sig2*sig1*rho12, sig2^2];
+
 C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13;  %3D
      sig2*sig1*rho12, sig2^2, sig2*sig3*rho23;
      sig3*sig1*rho13, sig3*sig2*rho23, sig3^2];
-% % 
-% C = [sig1^2, sig1*sig2*rho12; ...         #2D
-%     sig2*sig1*rho12, sig2^2];
+
+% C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13, sig1*sig4*rho14;  %4D
+%      sig2*sig1*rho12, sig2^2, sig2*sig3*rho23, sig2*sig4*rho24;
+%      sig3*sig1*rho13, sig3*sig2*rho23, sig3^2, sig3*sig4*rho34;
+%      sig4*sig1*rho13, sig4*sig2*rho24, sig4*sig3*rho34, sig4^2];
+
+% C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13, sig1*sig4*rho14,sig1*sig5*rho15 ;  %5D
+%      sig2*sig1*rho12, sig2^2, sig2*sig3*rho23, sig2*sig4*rho24,sig2*sig5*rho25;
+%      sig3*sig1*rho13, sig3*sig2*rho23, sig3^2, sig3*sig4*rho34, sig3*sig5*rho35;
+%      sig4*sig1*rho13, sig4*sig2*rho24, sig4*sig3*rho34, sig4^2, sig4*sig5*rho45;
+%      sig5*sig1*rho15, sig5*sig2*rho25, sig5*sig3*rho35, sig5*sig4*rho45, sig5^2];
 
 
 %% Numerical Parameters
@@ -26,9 +41,9 @@ maxOrder = 3;
 
 
 n = 10; %Points in each dimention
-N = dim*n + 1; %Total nr of points Not true :(
+N = calcN(dim,maxOrder,n);
 M = 10; %Number of timesteps.
-ep = 30; % Shape parameter
+ep = 50; % Shape parameter
 anchor = 20*ones(dim,1);%[23; 23;23]; % Anchor, freezing point
 
 %% Points for evaluation
