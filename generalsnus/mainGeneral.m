@@ -34,10 +34,10 @@ C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13;  %3D
 
 %% Numerical Parameters
 
-dim = 3;
+dim = 9;
 % maxOrder = min(3,dim-1);
-maxOrder = 3;
-% C = 0.5*randi(5)*rand(dim);
+maxOrder = 1;
+C = 0.5*ones(dim);
 
 
 n = 10; %Points in each dimention
@@ -53,13 +53,13 @@ smax = 4*dim*K;        %Largets value for simulation (center points)
 % temp_x = linspace(Eval_smin,Eval_smax,11);
 % [xx, yy, zz] = meshgrid(temp_x);
 % X_eval = [xx(:) yy(:) zz(:)]; %Evaluation points
-% X_eval = K*ones(1,dim);
+X_eval = K*ones(1,dim);
 
-kk = 0;
-for k = -20:100
-    kk = kk + 1;
-    X_eval(kk,:) = (K+k)*ones(1,dim);
-end
+% kk = 0;
+% for k = -20:100
+%     kk = kk + 1;
+%     X_eval(kk,:) = (K+k)*ones(1,dim);
+% end
 
 %% Run
 tic
@@ -155,7 +155,7 @@ if dim == 22
     view(3)
     title("Absolute Error")
 end
-    %dim plotting
+    %dim plotting för 1d
     start = 1;
     stop = n;
     x = 1:length(u(1:n));

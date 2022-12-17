@@ -1,0 +1,27 @@
+2D_001:
+    T = 1
+    sig1 = 0.15
+    sig2 = 0.2
+    r = 0.05
+    K = 20
+    rho12 = 0.5
+    Ne = 121
+    smax = 160
+    Eval_smax = 33.333
+    Eval_smin = 6.66667
+
+
+3D_001:
+    T = 1
+    sig1 = 0.15
+    sig2 = 0.2
+    sig3 = 0.1
+    r = 0.05
+    K = 20
+    rho12 = 0.5
+    rho13 = 0.5
+    rho23 = 0.5
+    Ne = 1331
+    smax = 240
+    Eval_smax = 33.333
+    Eval_smin = 6.66667
