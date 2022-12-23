@@ -1,7 +1,10 @@
-function [U, u, X, XT] = generalEuCall(X_eval, smax, K, T, r, C, anchor, n, M, ep, dim, maxOrder)
+function [U, u, X, XT, tot_time] = generalEuCallOpt(X_eval, smax, K, T, r, C, anchor, n, M, ep, dim, maxOrder)
 % Calculates the fair option price at points X_eval using a reproducing
 % kernel and radial basis funtions
+
 tot_time = 0;
+eps2 = ep^2;
+dim_list = 1:dim;
 %Check parameter matrix
 if issymmetric(C) == 0 || length(C) ~= dim
     error("Parameter matrix is not symmetric, please fix :)")
@@ -26,7 +29,7 @@ MS2V = MV2S';
 f_s2v = @(S) (MS2V*S')';
 f_v2s = @(V) (MV2S*V')';
 
-%Find in V
+%Anchor in V;
 anchorT = MS2V*anchor;
 
 
@@ -34,14 +37,13 @@ anchorT = MS2V*anchor;
 X = getXVector(anchorT,n,maxOrder);  %In v
 
 XT = f_v2s(X);              %In s
-
 X_eval = f_s2v(X_eval);     %In v
 
 
 % Define boundary points
 distClose = 0.01; %Computers cant count
 distFar = 0.99;
-range = sqrt(sum(XT.^2,2));             
+range = sqrt(sum(XT.^2,2));
 indClose = find(range<=distClose);
 indFar = find(range>=distFar);
 indInter = find(range>distClose & range<distFar);
@@ -57,70 +59,176 @@ XInter = X(indInter,:);
 NInter = length(indInter);
 
 
-%% Differentiation matrices
-
+%% 
 %General number of terms
 NFirstOrderTerms = dim;
 NPureSecondOrderTerms = dim;
 NMixedTerms = nchoosek(dim,2);
 NSecondOrderTerms = dim + NMixedTerms;
 
-mixers = nchoosek(1:dim,2); %Create the order of mixed terms
-all_d2 = [[1:dim]',[1:dim]';mixers];
+mixers = nchoosek(1:dim,2);   %Create the order of mixed terms
+all_d1 = [1:dim];
+all_d2 = [[1:dim]',[1:dim]';mixers];%All 2:nd derivatives in order
 
-%% Rotation matris
-%The elements in the coeff-vector is taken from transformation matrix
-%Eventuellt så är detta lite oklart, men jävligt snygg one-liners
-% R^(1 x NFirstOrderTerms)
-D1_coeff = @(derDim) [MS2V(1:dim,derDim)]';
-% R^(1 x NSecondOrderTerms)
-D2_coeff = @(derDim) [(MS2V(1:dim,derDim(:,1)).*MS2V(1:dim,derDim(:,2))); MS2V(mixers(:,1),derDim(:,1)).*MS2V(mixers(:,2),derDim(:,2)) + MS2V(mixers(:,2), derDim(:,1)).*MS2V(mixers(:,1), derDim(:,2))]';
-
+%% Derivative matrix
+%The matrix transforming the derivatives in s to derivative in v
 % [B1; B2; ...; B_d] = D1_coeff_mat * [A1; A2; ...;]
-D1_coeff_mat = D1_coeff(1:dim);
-D2_coeff_mat = D2_coeff(all_d2);
 
-%% Här testas det!
+%Functions for each element
+D1_coeff_func = @(derDim) [MS2V(1:dim,derDim)]';
+D2_coeff_func = @(derDim) [(MS2V(1:dim,derDim(:,1)).*MS2V(1:dim,derDim(:,2))); MS2V(mixers(:,1),derDim(:,1)).*MS2V(mixers(:,2),derDim(:,2)) + MS2V(mixers(:,2), derDim(:,1)).*MS2V(mixers(:,1), derDim(:,2))]';
+%Matrices
+D1_coeff_mat = D1_coeff_func(all_d1);
+D2_coeff_mat = D2_coeff_func(all_d2);
+
+%% Building the operator (With less memory)
+% With reproducing kernal and multiquadric kernal
+
+%Multiquadric reproducing kernel function
+multi = @(a,b) sqrt(1+eps2*(a-b).^2);
+
+
+%Elements in the NxN matrix
 tic
 [xx, yy] = meshgrid(1:N);
-A0 = GeneralRepKernel(X(xx(:),:), X(yy(:),:), ep, maxOrder);
+x_long = X(xx(:),:);
+y_long = X(yy(:),:);
+
+%A0
+A0 = ones(size(x_long,1), 1); %+1 is always included
+
+s = {};
+
+for i=1:maxOrder
+    subsets = nchoosek(dim_list,i);
+    for j = 1:size(subsets,1)
+        s(end+1) = {subsets(j,:)};
+    end
+end
+for i=1:length(s)
+    arr = cell2mat(s(i));
+    arr_len = length(arr);
+    coeff = 1;
+    for j=1:arr_len
+        coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));
+    end
+    A0 = A0 + coeff;
+end
+
 A0 = (reshape(A0,N,N))';
 [xx, yy] = meshgrid(indInter,1:N);
+x_long = X(xx(:),:);
+y_long = X(yy(:),:);
+
 time = toc;
 disp("Generating A0 took " + num2str(time) + "s")
 tot_time = tot_time + time;
 tic
+
 Operator = - r*A0(indInter, :);
 %Diagonal S-Matrices.
 S1 = XT(indInter,:);
 S2 = [XT(indInter,:).^2,XT(indInter,mixers(:,1)).*XT(indInter,mixers(:,2))];
 sig_D2 = [0.5*diag(C);zeros(NMixedTerms,1)];
 for i = 1:NMixedTerms
-   sig_D2(i + NPureSecondOrderTerms) = C(mixers(i,1), mixers(i,2));
+    sig_D2(i + NPureSecondOrderTerms) = C(mixers(i,1), mixers(i,2));
 end
 
-%Allocate
 tic
-for i = 1:NFirstOrderTerms
-    tmp = (reshape(GeneralRepKernelFirstDer(X(xx(:),:), X(yy(:),:), ep, i, maxOrder),N,NInter))';
-    Operator = Operator + r*(S1*D1_coeff_mat(:,i)).*tmp;
+for ii = 1:NFirstOrderTerms
+    derivative_coeff = (eps2)*(x_long(:,dim_list(ii))-y_long(:,dim_list(ii)))./(sqrt(eps2*(x_long(:,dim_list(ii))-y_long(:,dim_list(ii))).^2+1));
+    s = {};
+    d = dim_list;
+    d=d(d~=dim_list(ii));
+    for i=1:maxOrder-1
+        subsets = nchoosek(d,i);
+        for j = 1:size(subsets,1)
+            s(end+1) = {subsets(j,:)};
+        end
+    end
+    tmp = ones(size(x_long,1), 1); %+1 is always included
+    for i=1:length(s)
+        arr = cell2mat(s(i));
+        arr_len = length(arr);
+        coeff = 1;
+        for j=1:arr_len
+            coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));   
+        end
+        tmp = tmp + coeff;
+    end
+    tmp = derivative_coeff.*tmp;
+    tmp = (reshape(tmp,N,NInter))';
+    Operator = Operator + r*(S1*D1_coeff_mat(:,ii)).*tmp;
 end
+
 time = toc;
 disp("Generating D1 of Operator took " + num2str(time) + "s")
 tot_time = tot_time + time;
-tic 
-for i = 1:NSecondOrderTerms
-    if i <= NPureSecondOrderTerms
-        tmp = (reshape(GeneralRepKernelSecondDer(X(xx(:),:), X(yy(:),:), ep, i, maxOrder),N,NInter))';
+tic
+
+%2nd Order terms for operator
+for ii = 1:NSecondOrderTerms
+    if ii <= NPureSecondOrderTerms
+        derivative_coeff = (eps2)./((eps2*(x_long(:,dim_list(ii))-y_long(:,dim_list(ii))).^2+1).^(3/2));
+        s = {};
+        d = dim_list; %Vector with all dimensions except for the one we look at
+        d=d(d~=dim_list(ii));
+        
+        for i=1:maxOrder-1
+            subsets = nchoosek(d,i);
+            for j = 1:size(subsets,1)
+                s(end+1) = {subsets(j,:)};
+            end
+        end
+        tmp = ones(size(x_long,1), 1); %+1 is always included
+        for i=1:length(s)
+            arr = cell2mat(s(i));
+            arr_len = length(arr);
+            coeff = 1;
+            for j=1:arr_len
+                coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));
+            end
+            tmp = tmp + coeff;
+        end
+        tmp = derivative_coeff.*tmp;
+        tmp = (reshape(tmp,N,NInter))';
     else
-        tmp = (reshape(GeneralRepKernelSecondMixed(X(xx(:),:), X(yy(:),:), ep, mixers(i - NPureSecondOrderTerms,:), maxOrder),N,NInter))';
+        derivative_coeff = (eps2^2).*(x_long(:,mixers(ii - NPureSecondOrderTerms,1))-y_long(:,mixers(ii - NPureSecondOrderTerms,1)))./(sqrt(eps2*(x_long(:,mixers(ii- NPureSecondOrderTerms,1))-y_long(:,mixers(ii- NPureSecondOrderTerms,1))).^2+1)) .*...
+            (x_long(:,mixers(ii- NPureSecondOrderTerms,2))-y_long(:,mixers(ii- NPureSecondOrderTerms,2)))./(sqrt(eps2.*(x_long(:,mixers(ii- NPureSecondOrderTerms,2))-y_long(:,mixers(ii- NPureSecondOrderTerms,2))).^2+1));
+
+        s = {};
+        d = dim_list; %Vector with all dimensions except for the one we look at
+        d=d(d~=mixers(ii- NPureSecondOrderTerms,1));
+        d=d(d~=mixers(ii- NPureSecondOrderTerms,2));
+        for i=1:maxOrder-2
+            subsets = nchoosek(d,i);
+            for j = 1:size(subsets,1)
+                s(end+1) = {subsets(j,:)};
+            end
+        end
+        if isempty(s) && maxOrder<2
+            tmp = zeros(size(x,1), 1);
+        else
+            tmp = ones(size(x_long,1), 1); %+1 is always included
+            for i=1:length(s)
+                arr = cell2mat(s(i));
+                arr_len = length(arr);
+                coeff = 1;
+                for j=1:arr_len
+                    coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));   
+                end
+                tmp = tmp + coeff;
+            end
+            tmp = derivative_coeff.*tmp;
+        end
+        tmp = (reshape(tmp,N,NInter))';
     end
-    Operator = Operator + (S2*(D2_coeff_mat(:,i).*sig_D2)).*tmp;
+    Operator = Operator + (S2*(D2_coeff_mat(:,ii).*sig_D2)).*tmp;
 end
 time = toc;
 disp("Generating D2 of Operator took " + num2str(time) + "s")
 tot_time = tot_time + time;
-tic 
+tic
 
 Operator = (Operator)/A0;
 time = toc;
@@ -153,21 +261,21 @@ tvec = 0:k:T;
 
 %Time steppin'
 if T ~= 0
-for m = 1:M
-    u =Uc\(Lc\rhs);
-    
-    % BC at the next time level
-    nextstep = min(M,m+1);
-    rhs = beta1*u - beta2*u0;
-    
-    tn = tvec(nextstep); % Should be one step ahead
-    
-    rhs(indClose,:) = closeBC(XT(indClose,:),K,r,tn);
-    rhs(indFar,:) = farBC(XT(indFar,:),K,r,tn);
-    
-    % move the solutions one step
-    u0 = u;
-end
+    for m = 1:M
+        u =Uc\(Lc\rhs);
+        
+        % BC at the next time level
+        nextstep = min(M,m+1);
+        rhs = beta1*u - beta2*u0;
+        
+        tn = tvec(nextstep); % Should be one step ahead
+        
+        rhs(indClose,:) = closeBC(XT(indClose,:),K,r,tn);
+        rhs(indFar,:) = farBC(XT(indFar,:),K,r,tn);
+        
+        % move the solutions one step
+        u0 = u;
+    end
 end
 
 time = toc;
@@ -178,15 +286,39 @@ tot_time = tot_time + time;
 % Evaluation matrix
 tic
 [xx, yy] = meshgrid(1:Ne,1:N);
-E = GeneralRepKernel(X_eval(xx(:),:), X(yy(:),:), ep, maxOrder);
-E = reshape(E,N,Ne)'; %Note that this wierdness is due to reshape placing columns first (we want rows :))
+x_long = X_eval(xx(:),:);
+y_long = X(yy(:),:);
+
+s = {};
+
+d = 1:dim; %Vector with all dimensions
+for i=1:maxOrder
+    subsets = nchoosek(d,i);
+    for j = 1:size(subsets,1)
+        s(end+1) = {subsets(j,:)};
+    end
+end
+
+E = ones(size(x_long,1), 1); %+1 is always included
+
+for i=1:length(s)
+    arr = cell2mat(s(i));
+    arr_len = length(arr);
+    coeff = 1;
+    for j=1:arr_len
+        coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));
+    end
+    E = E + coeff;
+end
+E = reshape(E,N,Ne)'; %
 
 E = E/A0;
 time = toc;
 disp("Evaluation took " + num2str(time) + "s")
 % Solution
 U = E*u;
-%Rescale back
+
+%Rescale
 X_eval = X_eval*smax;
 U = U*smax; K = K*smax;
 X = X.*smax; XT = XT.*smax;
