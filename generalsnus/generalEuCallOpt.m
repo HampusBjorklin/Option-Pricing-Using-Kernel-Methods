@@ -23,6 +23,7 @@ anchor = anchor/smax;
 
 % %Transform matrices & functions
 MV2S = GCV2S(dim);
+
 MS2V = MV2S';
 
 
@@ -48,6 +49,8 @@ indClose = find(range<=distClose);
 indFar = find(range>=distFar);
 indInter = find(range>distClose & range<distFar);
 
+% indFar = [find(range>=distFar); (n+1:n:n*dim)'; (2*n:n:n*dim)'];
+% [~, indInter] = setdiff(XT, [XT(indFar, :); XT(indClose, :)], 'rows');
 
 % Boundary Conditions
 closeBC = @(S,K,r,t) zeros(size(S,1),1);
@@ -85,7 +88,7 @@ D2_coeff_mat = D2_coeff_func(all_d2);
 % With reproducing kernal and multiquadric kernal
 
 %Multiquadric reproducing kernel function
-multi = @(a,b) sqrt(1+eps2*(a-b).^2);
+% multi = @(a,b) sqrt(1+eps2*(a-b).^2);
 
 
 %Elements in the NxN matrix
@@ -110,9 +113,10 @@ for i=1:length(s)
     arr_len = length(arr);
     coeff = 1;
     for j=1:arr_len
-        coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));
+%         coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));
+        coeff = coeff.*(1+eps2*(x_long(:,arr(j))-y_long(:,arr(j))).^2);
     end
-    A0 = A0 + coeff;
+    A0 = A0 + sqrt(coeff);
 end
 
 A0 = (reshape(A0,N,N))';
@@ -152,9 +156,10 @@ for ii = 1:NFirstOrderTerms
         arr_len = length(arr);
         coeff = 1;
         for j=1:arr_len
-            coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));   
+%             coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));
+              coeff = coeff.*(1+eps2*(x_long(:,arr(j))-y_long(:,arr(j))).^2);
         end
-        tmp = tmp + coeff;
+        tmp = tmp + sqrt(coeff);
     end
     tmp = derivative_coeff.*tmp;
     tmp = (reshape(tmp,N,NInter))';
@@ -186,9 +191,10 @@ for ii = 1:NSecondOrderTerms
             arr_len = length(arr);
             coeff = 1;
             for j=1:arr_len
-                coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));
+%                 coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));
+                coeff = coeff.*(1+eps2*(x_long(:,arr(j))-y_long(:,arr(j))).^2);
             end
-            tmp = tmp + coeff;
+            tmp = tmp + sqrt(coeff);
         end
         tmp = derivative_coeff.*tmp;
         tmp = (reshape(tmp,N,NInter))';
@@ -207,7 +213,7 @@ for ii = 1:NSecondOrderTerms
             end
         end
         if isempty(s) && maxOrder<2
-            tmp = zeros(size(x,1), 1);
+            tmp = zeros(size(x_long,1), 1);
         else
             tmp = ones(size(x_long,1), 1); %+1 is always included
             for i=1:length(s)
@@ -215,9 +221,10 @@ for ii = 1:NSecondOrderTerms
                 arr_len = length(arr);
                 coeff = 1;
                 for j=1:arr_len
-                    coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));   
+%                     coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));  
+                    coeff = coeff.*(1+eps2*(x_long(:,arr(j))-y_long(:,arr(j))).^2);
                 end
-                tmp = tmp + coeff;
+                tmp = tmp + sqrt(coeff);
             end
             tmp = derivative_coeff.*tmp;
         end
@@ -306,9 +313,10 @@ for i=1:length(s)
     arr_len = length(arr);
     coeff = 1;
     for j=1:arr_len
-        coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j)));
+%         coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j
+        coeff = coeff.*(1+eps2*(x_long(:,arr(j))-y_long(:,arr(j))).^2);
     end
-    E = E + coeff;
+    E = E + sqrt(coeff);
 end
 E = reshape(E,N,Ne)'; %
 
