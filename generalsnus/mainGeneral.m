@@ -1,25 +1,25 @@
 clear all;close all; clc;
-disp("Saker testas alltid i denna kod, se till att du har kolla på vilka parametrar som du kör med")
 %% Ecomonic Parameters
 K=  20; % Strike
 T = 0.5; % Length of contract
 r = 0.02; % Interest rate
-sig1 = 0.15; sig2 = 0.2; sig3 = 0.1; sig4 = 0.2; sig5 = 0.12;
+sig1 = 0.15; sig2 = 0.2; sig3 = 0.1; sig4 = 0.2; sig5 = 0.12; sig6 = 0.08;
 rho12 = 0.5; rho23 = 0.5; rho13 = 0.5;
 rho14 = 0.5; rho24 = 0.5; rho34 = 0.5;
 rho15 = 0.5; rho25 = 0.5; rho35 = 0.5; rho45 = 0.5;
+rho16 = 0.5; rho26 = 0.5; rho36 = 0.5; rho46 = 0.5; rho56 = 0.5;
 rho = 0.5;
 % 
 % Build C-matrix
 
 % 
-% C = [sig1^2, sig1*sig2*rho12; ...         #2D
-%     sig2*sig1*rho12, sig2^2];
+C = [sig1^2, sig1*sig2*rho12; ...         #2D
+    sig2*sig1*rho12, sig2^2];
 
-C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13;  %3D
-     sig2*sig1*rho12, sig2^2, sig2*sig3*rho23;
-     sig3*sig1*rho13, sig3*sig2*rho23, sig3^2];
-
+% C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13;  %3D
+%      sig2*sig1*rho12, sig2^2, sig2*sig3*rho23;
+%      sig3*sig1*rho13, sig3*sig2*rho23, sig3^2];
+% % 
 % C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13, sig1*sig4*rho14;  %4D
 %      sig2*sig1*rho12, sig2^2, sig2*sig3*rho23, sig2*sig4*rho24;
 %      sig3*sig1*rho13, sig3*sig2*rho23, sig3^2, sig3*sig4*rho34;
@@ -31,41 +31,49 @@ C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13;  %3D
 %      sig4*sig1*rho13, sig4*sig2*rho24, sig4*sig3*rho34, sig4^2, sig4*sig5*rho45;
 %      sig5*sig1*rho15, sig5*sig2*rho25, sig5*sig3*rho35, sig5*sig4*rho45, sig5^2];
 
+%  C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13, sig1*sig4*rho14,sig1*sig5*rho15, sig1*sig6*rho16;  %6D
+%      sig2*sig1*rho12, sig2^2, sig2*sig3*rho23, sig2*sig4*rho24,sig2*sig5*rho25, sig2*sig6*rho26;
+%      sig3*sig1*rho13, sig3*sig2*rho23, sig3^2, sig3*sig4*rho34, sig3*sig5*rho35, sig3*sig6*rho36;
+%      sig4*sig1*rho13, sig4*sig2*rho24, sig4*sig3*rho34, sig4^2, sig4*sig5*rho45, sig4*sig6*rho46;
+%      sig5*sig1*rho15, sig5*sig2*rho25, sig5*sig3*rho35, sig5*sig4*rho45, sig5^2, sig5*sig6*rho56;
+%      sig6*sig1*rho16, sig6*sig2*rho26, sig6*sig3*rho36, sig6*sig4*rho46,sig6*sig5*rho56 sig6^2];
+
+%  C = [sig1^2, sig1*sig2*rho12, sig1*sig3*rho13, sig1*sig4*rho14,sig1*sig5*rho15, sig1*sig6*rho16;  %7D
+%      sig2*sig1*rho12, sig2^2, sig2*sig3*rho23, sig2*sig4*rho24,sig2*sig5*rho25, sig2*sig6*rho26;
+%      sig3*sig1*rho13, sig3*sig2*rho23, sig3^2, sig3*sig4*rho34, sig3*sig5*rho35, sig3*sig6*rho36;
+%      sig4*sig1*rho13, sig4*sig2*rho24, sig4*sig3*rho34, sig4^2, sig4*sig5*rho45, sig4*sig6*rho46;
+%      sig5*sig1*rho15, sig5*sig2*rho25, sig5*sig3*rho35, sig5*sig4*rho45, sig5^2, sig5*sig6*rho56;
+%      sig6*sig1*rho16, sig6*sig2*rho26, sig6*sig3*rho36, sig6*sig4*rho46,sig6*sig5*rho56 sig6^2];
+
 
 %% Numerical Parameters
 
-dim = 9;
+dim = 2;
 % maxOrder = min(3,dim-1);
-maxOrder = 1;
-C = 0.5*ones(dim);
+maxOrder = 2;
+% C = 0.5*ones(dim);
 
 
-n = 10; %Points in each dimention
+n = 30; %Points in each dimention
 N = calcN(dim,maxOrder,n);
+disp("Total number of points, N = " + num2str(N));
 M = 10; %Number of timesteps.
 ep = 50; % Shape parameter
-anchor = 20*ones(dim,1);%[23; 23;23]; % Anchor, freezing point
+anchor = 20*ones(dim,1);%Anchor, freezing point
 
 %% Points for evaluation
 smax = 4*dim*K;        %Largets value for simulation (center points)
-% Eval_smin = 1/3*K;  %Evalutaion min
-% Eval_smax = 5/3*K;  %Evaluation max
-% temp_x = linspace(Eval_smin,Eval_smax,11);
-% [xx, yy, zz] = meshgrid(temp_x);
-% X_eval = [xx(:) yy(:) zz(:)]; %Evaluation points
-X_eval = K*ones(1,dim);
+Eval_smin = 1/3*K;  %Evalutaion min
+Eval_smax = 5/3*K;  %Evaluation max
+temp_x = linspace(Eval_smin,Eval_smax,11);
+[xx, yy] = ndgrid(temp_x);
+X_eval = [xx(:) yy(:)]; %Evaluation points
+% X_eval = K*ones(1,dim); % One point. (Removes compute time for evalutation)
 
-% kk = 0;
-% for k = -20:100
-%     kk = kk + 1;
-%     X_eval(kk,:) = (K+k)*ones(1,dim);
-% end
 
 %% Run
-tic
-[U, u, X, XT] = generalEuCall(X_eval, smax, K, T, r, C, anchor, n, M, ep, dim, maxOrder);
-toc
 
+[U, u, X, XT, time] = generalEuCallOpt(X_eval, smax, K, T, r, C, anchor, n, M, ep, dim, maxOrder);
 
 %% Error and plotting
 if dim == 3
@@ -95,7 +103,7 @@ if dim == 3
     title("Solution along diagonal direction")
 
 end
-if dim == 22
+if dim == 2
     N_spec = 41;
     % Truth
     tic
@@ -126,8 +134,8 @@ if dim == 22
     hold on
     xlim([0.9*Eval_smin, 1.2*Eval_smax])
     ylim([0.9*Eval_smin, 1.2*Eval_smax])
-    plot3(XT(1:n,1),XT(1:n,2),zeros(length(XT(1:n,1))),"r-")
-    plot3(XT(n+1:N-1,1),XT(n+1:N-1,2),zeros(length(XT(1:n,1))),"r-")
+%     plot3(XT(1:n,1),XT(1:n,2),zeros(length(XT(1:n,1))),"r-")
+%     plot3(XT(n+1:N-1,1),XT(n+1:N-1,2),zeros(length(XT(1:n,1))),"r-")
     f1 = mesh(xx, yy, UU);
     title("Solution at Evaluation Points")
     view(3)
@@ -150,8 +158,8 @@ if dim == 22
     mesh(xx, yy,error)
     xlim([0.9*Eval_smin, 1.2*Eval_smax])
     ylim([0.9*Eval_smin, 1.2*Eval_smax])
-    plot3(XT(1:n,1),XT(1:n,2),zeros(length(XT(1:n,1))),"r-")
-    plot3(XT(n+1:N-1,1),XT(n+1:N-1,2),zeros(length(XT(1:n,1))),"r-")
+%     plot3(XT(1:n,1),XT(1:n,2),zeros(length(XT(1:n,1))),"r-")
+%     plot3(XT(n+1:N-1,1),XT(n+1:N-1,2),zeros(length(XT(1:n,1))),"r-")
     view(3)
     title("Absolute Error")
 end
