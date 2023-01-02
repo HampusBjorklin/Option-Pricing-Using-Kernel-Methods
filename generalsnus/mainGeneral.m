@@ -1,7 +1,7 @@
 clear all;close all; clc;
 %% Ecomonic Parameters
 K=  20; % Strike
-T = 0.5; % Length of contract
+T = 1; % Length of contract
 r = 0.02; % Interest rate
 sig1 = 0.15; sig2 = 0.2; sig3 = 0.1; sig4 = 0.2; sig5 = 0.12; sig6 = 0.08;
 rho12 = 0.5; rho23 = 0.5; rho13 = 0.5;
@@ -50,14 +50,14 @@ C = [sig1^2, sig1*sig2*rho12; ...         #2D
 
 dim = 2;
 % maxOrder = min(3,dim-1);
-maxOrder = 2;
+maxOrder = 1;
 % C = 0.5*ones(dim);
 
 
 n = 30; %Points in each dimention
 N = calcN(dim,maxOrder,n);
 disp("Total number of points, N = " + num2str(N));
-M = 10; %Number of timesteps.
+M = 30; %Number of timesteps.
 ep = 50; % Shape parameter
 anchor = 20*ones(dim,1);%Anchor, freezing point
 
@@ -104,10 +104,9 @@ if dim == 3
 
 end
 if dim == 2
-    N_spec = 41;
     % Truth
     tic
-    True = BSeuCall2D_RBFPUM(X_eval,K,T,r,sig1,sig2,rho,N_spec,M,ep,4,0.15); %Elisabeth
+    True = BSeuCall2D_RBFPUM(X_eval,K,T,r,sig1,sig2,rho,n,M,ep,1,0.15); %Elisabeth
     toc
     
     

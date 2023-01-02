@@ -23,7 +23,7 @@ anchor = anchor/smax;
 
 % %Transform matrices & functions
 MV2S = GCV2S(dim);
-
+% MV2S = eye(dim);
 MS2V = MV2S';
 
 
@@ -254,7 +254,7 @@ k = T/(M-1);
 beta0 = k* 2/3;
 beta1 = 4/3;
 beta2 = 1/3;
-
+[k, beta0, beta1, beta2] = BDF2coeffs(T,M);
 %Used to elimitate BC
 C = eye(N) -beta0*L;
 
@@ -273,7 +273,7 @@ if T ~= 0
         
         % BC at the next time level
         nextstep = min(M,m+1);
-        rhs = beta1*u - beta2*u0;
+        rhs = beta1(nextstep)*u - beta2(nextstep)*u0;
         
         tn = tvec(nextstep); % Should be one step ahead
         
@@ -313,7 +313,6 @@ for i=1:length(s)
     arr_len = length(arr);
     coeff = 1;
     for j=1:arr_len
-%         coeff = coeff.*multi(x_long(:,arr(j)),y_long(:,arr(j
         coeff = coeff.*(1+eps2*(x_long(:,arr(j))-y_long(:,arr(j))).^2);
     end
     E = E + sqrt(coeff);

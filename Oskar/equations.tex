@@ -333,19 +333,19 @@ N = \sum_{i=0}^{maxOrder} \begin{pmatrix} d \\ i \end{pmatrix} n^i
      color=red,
      mark=pentagon*,
      ] 
-    table [x index = 0,y index= 1] {time.txt}
+    table [x index = 0,y index= 1] {Data/time.txt}
     ;
      \addplot[
      color=black,
      mark=diamond*,
      ]
-     table [x index= 4,y index= 5]{time.txt}
+     table [x index= 4,y index= 5]{Data/time.txt}
      ;
      \addplot[
      color=blue,
      mark=*,
      ] 
-    table [x index= 6 ,y index= 7] {time.txt}
+    table [x index= 6 ,y index= 7] {Data/time.txt}
     ;
     \addplot[
     color = red,
@@ -392,7 +392,7 @@ ylabel=$S_2$,
 \addplot[
 color = red,
 only marks,]
-table [x index=0,y index=1,]{XCentD2M1.txt};
+table [x index=0,y index=1,]{Data/XCentD2M1.txt};
 \end{axis}
 \end{tikzpicture}
 \caption{Dim2 max1}
@@ -407,7 +407,7 @@ ylabel=$S_2$,
 \addplot[
 color = red,
 only marks,]
-table [x index=0,y index=1,]{XCentD2M2.txt};
+table [x index=0,y index=1,]{Data/XCentD2M2.txt};
 \end{axis}
 \end{tikzpicture}
 \caption{Dim2 max1}
@@ -423,7 +423,7 @@ zlabel=$S_3$,
 \addplot3[
 color = red,
 only marks,]
-table [x index=0,y index=1,z index = 2]{XCentD3M1.txt};
+table [x index=0,y index=1,z index = 2]{Data/XCentD3M1.txt};
 \end{axis}
 \end{tikzpicture}
 \caption{Dim2 max1}
@@ -439,7 +439,7 @@ zlabel=$S_3$,
 \addplot3[
 color = red,
 only marks,]
-table [x index=0,y index=1,z index = 2]{XCentD3M2.txt};
+table [x index=0,y index=1,z index = 2]{Data/XCentD3M2.txt};
 \end{axis}
 \end{tikzpicture}
 \caption{Dim3 max2}
@@ -455,7 +455,7 @@ zlabel=$S_3$,
 \addplot3[
 color = red,
 only marks,]
-table [x index=0,y index=1,z index = 2]{XCentD3M3.txt};
+table [x index=0,y index=1,z index = 2]{Data/XCentD3M3.txt};
 \end{axis}
 \end{tikzpicture}
 \caption{Dim3 max3}
@@ -477,19 +477,19 @@ table [x index=0,y index=1,z index = 2]{XCentD3M3.txt};
      color=red,
      mark=pentagon*,
      ] 
-    table [x index = 0,y index= 1] {NIncrese.txt}
+    table [x index = 0,y index= 1] {Data/NIncrese.txt}
     ;
      \addplot[
      color=black,
      mark=diamond*,
      ]
-     table [x index= 0,y index= 2]{NIncrese.txt}
+     table [x index= 0,y index= 2]{Data/NIncrese.txt}
      ;
      \addplot[
      color=blue,
      mark=*,
      ] 
-    table [x index= 3 ,y index= 4] {NIncrese.txt}
+    table [x index= 3 ,y index= 4] {Data/NIncrese.txt}
     ;
     \addplot[
     color = black,
@@ -533,7 +533,7 @@ table [x index=0,y index=1,z index = 2]{XCentD3M3.txt};
         ytick={0,3,6,9,12,15},}]
 \addplot3
 [surf,shader=faceted]
-table [x index = 0, y index = 1, z index = 2]{SolutionD2M2.txt};
+table [x index = 0, y index = 1, z index = 2]{Data/SolutionD2M2.txt};
 \end{axis}
 \end{tikzpicture}
 \caption{Computed solution around strike. Two dimensions and Max order 2}
@@ -549,11 +549,131 @@ table [x index = 0, y index = 1, z index = 2]{SolutionD2M2.txt};
         ytick=data,}]
 \addplot3
 [surf,shader=faceted]
-table [x index = 0, y index = 1, z index = 2]{ErrorD2M2.txt};
+table [x index = 0, y index = 1, z index = 2]{Data/ErrorD2M2.txt};
 \end{axis}
 \end{tikzpicture}
 \caption{Error around strike from solution compared with established solver. Two dimensions and Max order 2}
 \end{figure}
 
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[colorbar,
+        colormap/hot,
+        colorbar style={
+        ytick=data,}]
+\addplot3
+[surf,shader=faceted]
+table [x index = 0, y index = 1, z index = 2]{Data/D2M1NoRot.txt}
+;
+
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(5,20,15) (30,20,15)}
+;
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(20,5,15) (20,30,15)};
+\end{axis}
+\end{tikzpicture}
+\caption{Solution around strike from solution. No rotation D2M1 T = 1}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[colorbar,
+        colormap/hot,
+        colorbar style={
+        ytick=data,}]
+\addplot3
+[surf,shader=faceted]
+table [x index = 0, y index = 1, z index = 2]{Data/ErrorNoRot.txt}
+;
+
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(5,20,5) (30,20,5)}
+;
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(20,5,5) (20,30,5)};
+\end{axis}
+\end{tikzpicture}
+\caption{Error around strike from solution. No rotation D2M1 T = 1}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[colorbar,
+        colormap/hot,
+        colorbar style={
+        ytick=data,}]
+\addplot3
+[surf,shader=faceted]
+table [x index = 0, y index = 1, z index = 2]{Data/SolutionRot.txt}
+;
+
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(5,35,15) (35,5,15)}
+;
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(7,7,15) (34,34,15)};
+\end{axis}
+\end{tikzpicture}
+\caption{Solution around strike from solution. Rotation D2M1 T = 1}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[colorbar,
+        colormap/hot,
+        colorbar style={
+        ytick=data,}]
+\addplot3
+[surf,shader=faceted]
+table [x index = 0, y index = 1, z index = 2]{Data/ErrorRot.txt}
+;
+
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(5,35,0.5) (35,5,0.5)}
+;
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(7,7,0.5) (34,34,0.5)};
+\end{axis}
+\end{tikzpicture}
+\caption{Solution around strike from solution. Rotation D2M1 T = 1}
+\end{figure}
 
 \end{document}
