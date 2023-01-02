@@ -20,7 +20,7 @@
 
 \usepackage{physics}
 \usepackage{pgfplots} 
-\pgfplotsset{compat=newest} 
+\pgfplotsset{width=13cm,compat=newest} 
 \pgfplotsset{plot coordinates/math parser=false} 
 \newlength\figureheight 
 \newlength\figurewidth 
@@ -56,10 +56,10 @@ PDE, equation \ref{ekv:PDE}.
 
 \begin{equation}
     \begin{aligned}
-        &\frac{\partial u}{\partial t} + \frac{1}{2} \sum_{i, j}^d \mathbf{C}_{i,j} x_i x_j \frac{\partial^2 u}{\partial x_1 \partial x_2} + \sum_{i}^d r x_i \frac{\partial u}{\partial x_i} - ru = 0 \quad &\vec{x} \in [0\,1]^d, t \in [0, T] \\
-        &u(\vec{x},t) = \phi(\vec{x}, t) = \mathrm{max}(\frac{1}{d}\sum^d x_i - Ke^{T-t}, 0)    &||\vec{x}|| > 1, t \in [0, T] \\
-        &u(\vec{x}, t) = 0 &||\vec{x}|| = 0, t \in [0, T] \\
-        &u(\vec{x},t) = \phi(\vec{x},T) &t = T \\
+        &\frac{\partial u}{\partial t} + \frac{1}{2} \sum_{i, j}^d \mathbf{C}_{i,j} s_i s_j \frac{\partial^2 u}{\partial s_1 \partial s_2} + \sum_{i}^d r s_i \frac{\partial u}{\partial s_i} - ru = 0 \quad &\vec{s} \in [0,1]^d, t \in [0, T] \\
+        &u(\vec{s},t) = \phi(\vec{s}, t) = \mathrm{max}(\frac{1}{d}\sum^d s_i - Ke^{T-t}, 0)    &||\vec{s}|| \geq 1, t \in [0, T] \\
+        &u(\vec{s}, t) = 0 &||\vec{s}|| = 0, t \in [0, T] \\
+        &u(\vec{s},t) = \phi(\vec{s},T) &t = T \\
     \end{aligned}
     \label{ekv:PDE}
 \end{equation}
@@ -244,4 +244,316 @@ U_{RHS} = \phi(\vec{x_i},\tau_{m+1}), & \vec{x_i}  \in X_{far}
 \section*{Generalization}
 
 \subsection*{Repruducing Kernal}
+
+
+\section{Resultat}
+
+\begin{table}[H]
+  \caption{Comparison between solutions generated with different maxOrder. $U_{d,maxOrder}$}
+  \label{tab:rand_reverse}
+  \centering
+  \begin{tabular}{ccccccc}
+     \toprule
+	 $\mathbf{d}$ & $\mathbf{\Omega(X_{eval})}$ & $\mathbf{N_e}$ & $\mathbf{||U_{d,1} - U_{d,2}||_\infty}$&$\mathbf{||U_{d,2} - U_{d,3}||_\infty}$ & $\mathbf{||U_{d,1} - U_{d,3}||_\infty}$ & $\mathbf{||U_{d,1}||_\infty}$ \\
+	 \midrule
+     2 & $[ \frac{1}{3}K,\frac{5}{3}K ]^d $ & 121 & 0.0919 & N/A & N/A & 13.4848 \\
+     3& $[ \frac{1}{3}K,\frac{5}{3}K ]^d $ &1331 & 0.0905 & 0.0727 & 0.1449 &  13.4103 \\
+     4 & $[ \frac{1}{3}K,\frac{5}{3}K ]^d $ &625 & 0.0660 & 0.0622 & 0.1210 & 13.2346\\
+     4 & $[ 0,2K ]^d $  &625 & 0.1906 & 0.1073 & 0.2581  &  20.1911\\
+     5& $[ \frac{1}{3}K,\frac{5}{3}K ]^d $ &3125 & 0.0630 & 0.0532 & 0.1031&  13.0483\\
+     6& $[ \frac{1}{3}K,\frac{5}{3}K ]^d $ &15625 & 0.0598 & TBD? & TBD?&  13.4752
+\\
+
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{equation}
+N = \sum_{i=0}^{maxOrder} \begin{pmatrix} d \\ i \end{pmatrix} n^i
+\end{equation}
+
+\begin{table}[H]
+  \caption{Run times for different dimensional problems and max order}
+  \label{tab:runtime}
+  \centering
+  \begin{tabular}{cccccc}
+     \toprule
+	   &  &  &\multicolumn{3}{c}{\textbf{Run Time [s]}} \\
+	 \cmidrule(lr){4-6}
+	 \textbf{n} & $\mathbf{N_e}$ &\textbf{d} & $\mathrm{MaxOrder} = 1$ & $\mathrm{MaxOrder} = 2$ & $\mathrm{MaxOrder} = 3$ \\
+	 \midrule
+     10 & 1 &2 & 0.0197794 & 0.038682 & \textbf{-}\\
+     10 & 1 &3 & 0.0251483 & 0.10886 & 2.6737 \\
+     10 & 1 &4 & 0.0107194 & 0.54458 & 69.8605\\
+     10 & 1 &5 & 0.0047781 & 2.2029 & 3579.4775\\  
+     10 & 1 &6 & 0.0142638 & 6.3872 & -\\
+     10 & 1 &7 & 0.0099809 & 16.9169 & -\\
+     10 & 1 &8 & 0.0101846 & 40.2869 & -\\
+     10 & 1 &9 & 0.0161873 & 86.2708 & -\\
+     10 & 1 &10 & 0.0210623 & 175.614 & -\\
+     10 & 1 &11 & 0.0249659 & 421.7462 & -\\
+     10 & 1 &12 & 0.0293936 & 1491.1291 & -\\
+     10 & 1 &13 & 0.0406836 & 3580.1538 & -\\
+     10 & 1 &14 & 0.0507523 & - & -\\
+     10 & 1 &15 & 0.0693409 & - & -\\
+     10 & 1 &16 & 0.0961076 & - & -\\
+     10 & 1 &17 & 0.0936543 & - & -\\
+     10 & 1 &18 & 0.1303859 & - & -\\
+     10 & 1 &19 & 0.2148575 & - & -\\
+     10 & 1 &20 & 0.2233701 & - & -\\
+     10 & 1 &21 & 0.2683903 & - & -\\
+     10 & 1 &22 & 0.3102177 & - & -\\
+     10 & 1 &23 & 0.2683903 & - & -\\
+     10 & 1 &24 & 0.3102177 & - & -\\
+     10 & 1 &25 & 0.3495040 & - & -\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+\begin{figure}[H]
+\centering
+    \begin{tikzpicture}
+    \begin{loglogaxis}[
+        xmin=2,
+        xmax=40,
+        grid = major,
+        xlabel=Dimensions (1),
+        ylabel=Time (s),
+        legend style={at={(1.2,1)},
+        anchor=north,legend columns=1},
+     ]
+     %\addplot[
+     %domain=1:20,
+     %color=green,
+     %]
+     %{0.1*exp(x)}
+     %;
+     \addplot[
+     color=red,
+     mark=pentagon*,
+     ] 
+    table [x index = 0,y index= 1] {time.txt}
+    ;
+     \addplot[
+     color=black,
+     mark=diamond*,
+     ]
+     table [x index= 4,y index= 5]{time.txt}
+     ;
+     \addplot[
+     color=blue,
+     mark=*,
+     ] 
+    table [x index= 6 ,y index= 7] {time.txt}
+    ;
+    \addplot[
+    color = red,
+    domain = 2:30,]
+    {exp(-13.3667)*x^3.9899}
+    coordinate [pos =0.5] (A)
+   	coordinate [pos =0.95]  (B)
+    ;
+    \addplot[
+    color = black,
+    domain = 2:15,]
+    {exp(-8.72)*x^(6.165)}
+    coordinate [pos =0.85] (C)
+   	coordinate [pos =0.95]  (D)
+    ;
+    \addplot[
+    color = blue,
+    domain = 2:7,]
+    {exp(-14.5869)*x^(13.964)}
+    coordinate [pos =0.8] (E)
+   	coordinate [pos =0.95]  (F)
+    ;
+    \draw (A) -| (B) 
+     node [pos=0.75,anchor=west] {3.99};
+    \draw (C) -| (D) 
+    node [pos=0.75,anchor=west] {6.16};
+    \draw (E) -| (F) 
+     node [pos=0.75,anchor=west] {13.96};
+     
+    \legend{MaxOrder = 1,MaxOrder = 2, MaxOrder = 3}
+    \end{loglogaxis}
+    \end{tikzpicture}
+    \caption{Loglog time with fitted linjes }
+    \label{fig:timeloglog}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+xlabel=$S_1$,
+ylabel=$S_2$,
+]
+\addplot[
+color = red,
+only marks,]
+table [x index=0,y index=1,]{XCentD2M1.txt};
+\end{axis}
+\end{tikzpicture}
+\caption{Dim2 max1}
+\end{figure}
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+xlabel=$S_1$,
+ylabel=$S_2$,
+]
+\addplot[
+color = red,
+only marks,]
+table [x index=0,y index=1,]{XCentD2M2.txt};
+\end{axis}
+\end{tikzpicture}
+\caption{Dim2 max1}
+\end{figure}
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+xlabel=$S_1$,
+ylabel=$S_2$,
+zlabel=$S_3$,
+]
+\addplot3[
+color = red,
+only marks,]
+table [x index=0,y index=1,z index = 2]{XCentD3M1.txt};
+\end{axis}
+\end{tikzpicture}
+\caption{Dim2 max1}
+\end{figure}
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+xlabel=$S_1$,
+ylabel=$S_2$,
+zlabel=$S_3$,
+]
+\addplot3[
+color = red,
+only marks,]
+table [x index=0,y index=1,z index = 2]{XCentD3M2.txt};
+\end{axis}
+\end{tikzpicture}
+\caption{Dim3 max2}
+\end{figure}
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+xlabel=$S_1$,
+ylabel=$S_2$,
+zlabel=$S_3$,
+]
+\addplot3[
+color = red,
+only marks,]
+table [x index=0,y index=1,z index = 2]{XCentD3M3.txt};
+\end{axis}
+\end{tikzpicture}
+\caption{Dim3 max3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+    \begin{tikzpicture}
+    \begin{loglogaxis}[
+        xmin=1,
+        xmax=45,
+        grid = major,
+        xlabel=Dimensions (1),
+        ylabel=Total Centerponints (s),
+        legend style={at={(1.2,1)},
+        anchor=north,legend columns=1},
+     ]
+     \addplot[
+     color=red,
+     mark=pentagon*,
+     ] 
+    table [x index = 0,y index= 1] {NIncrese.txt}
+    ;
+     \addplot[
+     color=black,
+     mark=diamond*,
+     ]
+     table [x index= 0,y index= 2]{NIncrese.txt}
+     ;
+     \addplot[
+     color=blue,
+     mark=*,
+     ] 
+    table [x index= 3 ,y index= 4] {NIncrese.txt}
+    ;
+    \addplot[
+    color = black,
+    domain = 1:35,]
+    {exp(3.4655)*x^(2.1421)}
+    coordinate [pos =0.8] (C)
+   	coordinate [pos =0.95]  (D)
+    ;
+    \addplot[
+    color = red,
+    domain = 1:35,]
+    {exp(2.3490)*x^(0.9856)}
+    coordinate [pos =0.8] (A)
+   	coordinate [pos =0.95]  (B)
+    ;
+    \addplot[
+    color = blue,
+    domain = 1:35,]
+    {exp(3.7718)*x^(3.4152)}
+    coordinate [pos =0.8] (E)
+   	coordinate [pos =0.95]  (F)
+    ;
+    \draw (A) -| (B) 
+     node [pos=0.75,anchor=west] {0.9856};
+    \draw (C) -| (D) 
+    node [pos=0.75,anchor=west] {2.1421};
+    \draw (E) -| (F) 
+     node [pos=0.75,anchor=west] {3.4152};
+    \legend{MaxOrder = 1,MaxOrder = 2, MaxOrder = 3}
+    \end{loglogaxis}
+    \end{tikzpicture}
+    \caption{Total number of center points (N) for n = 10 }
+    \label{fig:NIncrese}
+\end{figure}
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[colorbar,
+        colormap/hot,
+        colorbar style={
+        ytick={0,3,6,9,12,15},}]
+\addplot3
+[surf,shader=faceted]
+table [x index = 0, y index = 1, z index = 2]{SolutionD2M2.txt};
+\end{axis}
+\end{tikzpicture}
+\caption{Computed solution around strike. Two dimensions and Max order 2}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[colorbar,
+        colormap/hot,
+        colorbar style={
+        ytick=data,}]
+\addplot3
+[surf,shader=faceted]
+table [x index = 0, y index = 1, z index = 2]{ErrorD2M2.txt};
+\end{axis}
+\end{tikzpicture}
+\caption{Error around strike from solution compared with established solver. Two dimensions and Max order 2}
+\end{figure}
+
+
 \end{document}
