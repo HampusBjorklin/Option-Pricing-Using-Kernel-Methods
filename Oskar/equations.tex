@@ -56,7 +56,7 @@ PDE, equation \ref{ekv:PDE}.
 
 \begin{equation}
     \begin{aligned}
-        &\frac{\partial u}{\partial t} + \frac{1}{2} \sum_{i, j}^d \mathbf{C}_{i,j} s_i s_j \frac{\partial^2 u}{\partial s_1 \partial s_2} + \sum_{i}^d r s_i \frac{\partial u}{\partial s_i} - ru = 0 \quad &\vec{s} \in [0,1]^d, t \in [0, T] \\
+        &\frac{\partial u}{\partial t} + \frac{1}{2} \sum_{i, j}^d \mathbf{C}_{i,j} s_i s_j \frac{\partial^2 u}{\partial s_i \partial s_j} + \sum_{i}^d r s_i \frac{\partial u}{\partial s_i} - ru = 0 \quad &\vec{s} \in [0,1]^d, t \in [0, T] \\
         &u(\vec{s},t) = \phi(\vec{s}, t) = \mathrm{max}(\frac{1}{d}\sum^d s_i - Ke^{T-t}, 0)    &||\vec{s}|| \geq 1, t \in [0, T] \\
         &u(\vec{s}, t) = 0 &||\vec{s}|| = 0, t \in [0, T] \\
         &u(\vec{s},t) = \phi(\vec{s},T) &t = T \\
@@ -528,7 +528,7 @@ table [x index=0,y index=1,z index = 2]{Data/XCentD3M3.txt};
 \centering
 \begin{tikzpicture}
 \begin{axis}[colorbar,
-        colormap/hot,
+        colormap/jet,
         colorbar style={
         ytick={0,3,6,9,12,15},}]
 \addplot3
@@ -544,7 +544,7 @@ table [x index = 0, y index = 1, z index = 2]{Data/SolutionD2M2.txt};
 \centering
 \begin{tikzpicture}
 \begin{axis}[colorbar,
-        colormap/hot,
+        colormap/jet,
         colorbar style={
         ytick=data,}]
 \addplot3
@@ -559,7 +559,7 @@ table [x index = 0, y index = 1, z index = 2]{Data/ErrorD2M2.txt};
 \centering
 \begin{tikzpicture}
 \begin{axis}[colorbar,
-        colormap/hot,
+        colormap/jet,
         colorbar style={
         ytick=data,}]
 \addplot3
@@ -590,7 +590,7 @@ coordinates {(20,5,15) (20,30,15)};
 \centering
 \begin{tikzpicture}
 \begin{axis}[colorbar,
-        colormap/hot,
+        colormap/jet,
         colorbar style={
         ytick=data,}]
 \addplot3
@@ -620,7 +620,7 @@ coordinates {(20,5,5) (20,30,5)};
 \centering
 \begin{tikzpicture}
 \begin{axis}[colorbar,
-        colormap/hot,
+        colormap/jet,
         colorbar style={
         ytick=data,}]
 \addplot3
@@ -650,7 +650,7 @@ coordinates {(7,7,15) (34,34,15)};
 \centering
 \begin{tikzpicture}
 \begin{axis}[colorbar,
-        colormap/hot,
+        colormap/jet,
         colorbar style={
         ytick=data,}]
 \addplot3
@@ -676,4 +676,137 @@ coordinates {(7,7,0.5) (34,34,0.5)};
 \caption{Solution around strike from solution. Rotation D2M1 T = 1}
 \end{figure}
 
+\begin{figure}[H]
+\centering
+	\begin{tikzpicture}
+    \begin{loglogaxis}[
+        xmin=5,
+        xmax=100,
+        grid=major,
+        xlabel= $n$-Points in each dimention,
+        ylabel=$||\mathrm{error}||_\infty$- Absolute inf-norm error ,
+        legend style={at={(1,1)},
+        anchor=north east,legend columns=1},
+     ]
+     \addplot[
+     color=blue,
+     mark=*,
+     ] 
+    table [x index= 0 ,y index= 1] {Data/Space_converge.txt}
+    ;
+    \legend{Datapoints}
+    \end{loglogaxis}
+    \end{tikzpicture}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+	\begin{tikzpicture}
+    \begin{loglogaxis}[
+        xmin=2,
+        title=\textbf{Time Convergence in loglog graph},
+        xmax=40,
+        grid=major,
+        xlabel= $M$- number of timesteps,
+        ylabel=$||\mathrm{error}||_\infty$- Absolute inf-norm error ,
+        legend style={at={(1,1)},
+        anchor=north east,legend columns=1},
+     ]
+     \addplot[
+     color=red,
+     mark=*,
+     ] 
+    table [x index= 0 ,y index= 1] {Data/conv_time.txt}
+    ;
+    \legend{Datapoints}
+    \end{loglogaxis}
+    \end{tikzpicture}
+\end{figure}
+
+\begin{gather*}
+K = 20, \; T = 0.5, \; r = 0.02, \\
+\\
+C = \begin{pmatrix}
+\sigma_1^2 & \rho_{12}\sigma_1 \sigma_2 \\
+\rho_{12}\sigma_2 \sigma_1 & \sigma_2^2
+\end{pmatrix}
+= 
+\begin{pmatrix}
+0.0225 & 0.0150 \\
+0.0150 & 0.0400 
+\end{pmatrix}
+\\ 
+\end{gather*}
+
+\begin{gather*}
+n = 40, \; M = 15, \; \epsilon = 50 \\
+ \mathrm{anchor} = 21 
+\end{gather*}
+
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+xlabel=$S_1$,
+ylabel=$S_2$,
+]
+\addplot[
+color = red,
+only marks,]
+table [x index=2,y index=3,]{Data/XochXT.txt};
+\addplot[
+color = blue,
+only marks,]
+table [x index=6,y index=7,]{Data/XochXT.txt};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[colorbar,
+        colormap/jet,
+        colorbar style={
+        ytick=data,}]
+\addplot3
+[surf,shader=faceted]
+table [x index = 0, y index = 1, z index = 2]{Data/FinalSolution.txt}
+;
+
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(5,35,14) (35,5,14)}
+;
+\addplot3[
+mark=none,
+color=red,
+line width=3pt,
+] 
+coordinates {(7,7,14) (34,34,14)};
+\end{axis}
+\end{tikzpicture}
+\caption{Solution around strike from solution. Rotation D2M1 T = 1}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[colorbar,
+        colormap/jet,
+        colorbar style={
+        ytick=data,}]
+\addplot3
+[surf,shader=faceted]
+table [x index = 0, y index = 1, z index = 2]{Data/FinalFiner.txt}
+;
+\end{axis}
+\end{tikzpicture}
+\caption{Error final}
+\end{figure}
 \end{document}
