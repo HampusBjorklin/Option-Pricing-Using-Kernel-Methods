@@ -560,6 +560,10 @@ table [x index = 0, y index = 1, z index = 2]{Data/ErrorD2M2.txt};
 \begin{tikzpicture}
 \begin{axis}[colorbar,
         colormap/jet,
+        	title=\textbf{Solution at Evalutaion Points, Center Points 			visiualized in red},
+        view={-45}{45},
+        xlabel=$s_1$,
+        ylabel=$s_2$,
         colorbar style={
         ytick=data,}]
 \addplot3
@@ -572,14 +576,14 @@ mark=none,
 color=red,
 line width=3pt,
 ] 
-coordinates {(5,20,15) (30,20,15)}
+coordinates {(5,16,10) (35,16,10)}
 ;
 \addplot3[
 mark=none,
 color=red,
 line width=3pt,
 ] 
-coordinates {(20,5,15) (20,30,15)};
+coordinates {(16,5,10) (16,35,10)};
 \end{axis}
 \end{tikzpicture}
 \caption{Solution around strike from solution. No rotation D2M1 T = 1}
@@ -799,6 +803,10 @@ coordinates {(7,7,14) (34,34,14)};
 \begin{tikzpicture}
 \begin{axis}[colorbar,
         colormap/jet,
+        view={-45}{45},
+        title=\textbf{Error for problem: $d=2$, $m=1$},
+        xlabel=$s_1$,
+        ylabel=$s_2$,
         colorbar style={
         ytick=data,}]
 \addplot3
@@ -809,4 +817,25 @@ table [x index = 0, y index = 1, z index = 2]{Data/FinalFiner.txt}
 \end{tikzpicture}
 \caption{Error final}
 \end{figure}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[colorbar,
+        colormap/jet,
+        	title=\textbf{True Solution},
+        view={-45}{45},
+        xlabel=$s_1$,
+        ylabel=$s_2$,
+        colorbar style={
+        ytick=data,}]
+\addplot3
+[surf,shader=faceted]
+table [x index = 0, y index = 1, z index = 2]{Data/True.txt}
+;
+\end{axis}
+\end{tikzpicture}
+\caption{True solution. For comparing with unrotated}
+\end{figure}
+
 \end{document}
