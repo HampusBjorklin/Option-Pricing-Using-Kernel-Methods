@@ -1,4 +1,4 @@
-function [X] = getXVector(anchor, n, maxorder)
+function [X] = getXVector(anchor, n, maxorder, lim)
 %GETXVECTOR Genererar X-vektorn
     if nargin < 3
         maxorder = 1;
@@ -10,11 +10,11 @@ function [X] = getXVector(anchor, n, maxorder)
     startpoints = anchor.*(ones(dim));
     endpoints = anchor.*(ones(dim));
 
-    startpoints(1,1) = 0;
-    endpoints(1,1) = 1;
+    startpoints(1,1) = lim(1,1);
+    endpoints(1,1) = lim(1,2);
     for d=2:dim
-        startpoints(d, d) = -0.5;
-        endpoints(d, d) = 0.5;
+        startpoints(d, d) = lim(d,1);
+        endpoints(d, d) = lim(d,2);
     end
     sz = size(startpoints);
 

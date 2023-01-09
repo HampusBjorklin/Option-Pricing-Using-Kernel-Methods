@@ -1,6 +1,7 @@
 function [U, u, X, XT, tot_time] = generalEuCallOpt(X_eval, smax, K, T, r, C, anchor, n, M, ep, dim, maxOrder)
 % Calculates the fair option price at points X_eval using a reproducing
 % kernel and radial basis funtions
+Ntime2understand = 10;
 
 tot_time = 0;
 eps2 = ep^2;
@@ -23,22 +24,44 @@ anchor = anchor/smax;
 
 % %Transform matrices & functions
 MV2S = GCV2S(dim);
-% MV2S = eye(dim);
+if dim == maxOrder
+   MV2S = eye(dim); 
+end
+
 MS2V = MV2S';
 
 
 f_s2v = @(S) (MS2V*S')';
 f_v2s = @(V) (MV2S*V')';
 
-%Anchor in V;
+
 anchorT = MS2V*anchor;
 
-
+limit = [zeros(dim,1),ones(dim,1)];
+if dim ~= maxOrder
+for i = 2:dim
+    v = MV2S(:,i);
+    lim = min(abs(anchor./v));
+    limit(i,:) = [-lim, lim];
+end
+end
 %Center points
-X = getXVector(anchorT,n,maxOrder);  %In v
+X = getXVector(anchorT,n,maxOrder, limit);  %In v
 
 XT = f_v2s(X);              %In s
 X_eval = f_s2v(X_eval);     %In v
+
+
+%Drop the points that are negativ
+indices = find(XT < -0.00001); % find the indices of negative elements
+[row, col] = ind2sub(size(XT), indices); % convert indices to row-column form
+unique_rows = unique(row); % find the unique rows containing negative elements
+X(unique_rows,:) = [];
+XT(unique_rows,:) = [];
+for j = 1:Ntime2understand
+disp("Dropped " +num2str(length(unique_rows)) + " negative elements")
+end
+N = length(XT);
 
 
 % Define boundary points
@@ -254,7 +277,7 @@ k = T/(M-1);
 beta0 = k* 2/3;
 beta1 = 4/3;
 beta2 = 1/3;
-[k, beta0, beta1, beta2] = BDF2coeffs(T,M);
+% [k, beta0, beta1, beta2] = BDF2coeffs(T,M);
 %Used to elimitate BC
 C = eye(N) -beta0*L;
 
@@ -273,7 +296,7 @@ if T ~= 0
         
         % BC at the next time level
         nextstep = min(M,m+1);
-        rhs = beta1(nextstep)*u - beta2(nextstep)*u0;
+        rhs = beta1*u - beta2*u0;
         
         tn = tvec(nextstep); % Should be one step ahead
         
