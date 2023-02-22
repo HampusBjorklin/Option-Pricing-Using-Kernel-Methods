@@ -1,5 +1,5 @@
-# Option-Pricing-Using-Kernel-Methods
-## abstract
+# Option Pricing Using Kernel Methods
+## Abstract
 This study takes on the task of pricing a high dimensional basket option using deterministic
 and efficient kernel method. The original method is proposed in a pre-print by Christian Rieger
 and Holger Wendland. The method is used to approximate high dimensional functions by their
